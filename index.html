@@ -35,8 +35,8 @@ body{font-family:'Segoe UI',-apple-system,sans-serif;background:var(--li);color:
 .mc.ok{border-left-color:var(--ok)}.mc.wa{border-left-color:var(--wa)}.mc.da{border-left-color:var(--da)}.mc.bl{border-left-color:var(--se)}.mc.pu{border-left-color:var(--pu)}
 .mv{font-size:26px;font-weight:700;line-height:1}.ml{font-size:10.5px;color:var(--mu);text-transform:uppercase;letter-spacing:.05em;margin-top:3px}.ms{font-size:11px;color:var(--mu);margin-top:2px}
 .card{background:var(--ca);border:1px solid var(--bo);border-radius:10px;padding:1rem 1.25rem;margin-bottom:.85rem}
-.fg{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:.75rem}
-.fc{background:var(--ca);border:1px solid var(--bo);border-radius:10px;padding:.875rem 1rem}
+.fg{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-bottom:.75rem}
+.fc{background:var(--ca);border:1px solid var(--bo);border-radius:10px;padding:.875rem 1rem;min-width:0}
 .fc-t{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--mu);margin-bottom:.6rem;display:flex;align-items:center;justify-content:space-between}
 .fc-n{font-size:16px;font-weight:700}
 .fc-r{display:flex;align-items:center;gap:6px;padding:5px 0;border-bottom:.5px solid var(--bo);font-size:12px}
@@ -224,13 +224,15 @@ input:checked+.tgl-s:before{transform:translateX(20px)}
     <button class="b-ex" onclick="expCSV()">⬇ Exportar CSV</button>
   </div>
   <div id="miIndicador" style="display:none;margin-bottom:1rem"></div>
-  <div class="metrics" id="mRow"></div>
-  <div class="sl">Cumplimiento semanal</div>
-  <div class="card" id="iSem"></div>
-  <div class="sl">Cumplimiento acumulado — mes actual</div>
-  <div class="card" id="iMes"></div>
-  <div class="sl" id="slCar">Carga semanal (compromisos declarados / máximo 5)</div>
-  <div class="card" id="iCar"></div>
+  <div id="teamStats">
+    <div class="metrics" id="mRow"></div>
+    <div class="sl">Cumplimiento semanal</div>
+    <div class="card" id="iSem"></div>
+    <div class="sl">Cumplimiento acumulado — mes actual</div>
+    <div class="card" id="iMes"></div>
+    <div class="sl" id="slCar">Carga semanal (compromisos declarados / máximo 5)</div>
+    <div class="card" id="iCar"></div>
+  </div>
 </div>
 
 <!-- HISTORIAL -->
@@ -802,20 +804,26 @@ function renderInd(){
   const cM=u=>{let t=0,ok=0;for(let w=-4;w<=0;w++){const {fri}=getWk(w);const {fri:f0}=getWk(S.wo);if(fri.getMonth()===f0.getMonth()){const s=cS(u,w);t+=s.tot;ok+=s.ok;}}return t?Math.round(ok/t*100):null;};
   const col=p=>p===null?'#ccc':p>=80?'var(--ok)':p>=50?'var(--wa)':'var(--da)';
   const miEl=document.getElementById('miIndicador');
+  const teamEl=document.getElementById('teamStats');
   if(S.user!=='admin'){
     const meS=cS(S.user,S.wo);
     const meM=cM(S.user);
     const car=S.comps.filter(c=>c.user===S.user&&c.wo===S.wo).length;
+    const meSp=S.comps.filter(c=>c.user===S.user&&c.sp&&!c.spR).length;
+    const meAr=S.comps.filter(c=>c.user===S.user&&c.streak>=2).length;
     miEl.style.display='';
+    teamEl.style.display='none';
     miEl.innerHTML=`<div class="card" style="border-left:4px solid ${col(meS.pct)}">
       <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--mu);margin-bottom:8px">Tu cumplimiento — ${uName(S.user)}</div>
       <div style="display:flex;gap:1.75rem;flex-wrap:wrap;align-items:baseline">
         <div><span style="font-size:28px;font-weight:700;color:${col(meS.pct)}">${meS.pct!==null?meS.pct+'%':'—'}</span><span style="font-size:11px;color:var(--mu);margin-left:5px">esta semana (${meS.ok}/${meS.tot})</span></div>
         <div><span style="font-size:18px;font-weight:700;color:${col(meM)}">${meM!==null?meM+'%':'—'}</span><span style="font-size:11px;color:var(--mu);margin-left:5px">promedio del mes</span></div>
         <div><span style="font-size:18px;font-weight:700">${car}/${S.cfg.maxComp}</span><span style="font-size:11px;color:var(--mu);margin-left:5px">carga declarada</span></div>
+        <div><span style="font-size:18px;font-weight:700;color:${meSp?'var(--pu)':'var(--mu)'}">${meSp}</span><span style="font-size:11px;color:var(--mu);margin-left:5px">soportes sin respuesta</span></div>
+        <div><span style="font-size:18px;font-weight:700;color:${meAr?'var(--da)':'var(--mu)'}">${meAr}</span><span style="font-size:11px;color:var(--mu);margin-left:5px">con arrastre</span></div>
       </div>
     </div>`;
-  } else { miEl.style.display='none'; }
+  } else { miEl.style.display='none'; teamEl.style.display=''; }
   const all=S.comps.filter(c=>c.wo===S.wo);
   const okT=all.filter(c=>c.st==='ok').length;
   const noT=all.filter(c=>c.st==='no').length;
@@ -952,11 +960,11 @@ function closeMC(){document.getElementById('ovMC').classList.remove('op');}
 function selT(tipo,btn){
   S.selTipo=tipo;
   document.querySelectorAll('.t-btn').forEach(b=>b.classList.remove('sel'));btn.classList.add('sel');
-  const u=S.user==='admin'?null:S.user;
+  const u=S.user==='admin'?ADMIN_EMAIL:S.user;
   const src={doc:FUENTES.doc,nc:FUENTES.nc,poa:FUENTES.poa,otro:null}[tipo];
   const rfS=document.getElementById('rfSec'),rfL=document.getElementById('rfList');
   if(src){
-    const f=u?src.filter(x=>x.r===u):src;
+    const f=src.filter(x=>x.r===u);
     rfL.innerHTML=f.length?f.map(x=>`<div class="ri" onclick="selR('${x.c}','${x.n.replace(/'/g,"\\'")}',this)">
       <span>${x.c} — ${x.n}</span>
       ${x.d?`<span class="dias ${x.d>180?'d-r':x.d>60?'d-a':'d-g'}">${x.d}d</span>`:''}
