@@ -1,0 +1,1037 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Planificación Semanal — Equipo SGC</title>
+<style>
+:root{--pr:#1a3a5c;--se:#2e6da4;--ac:#e87722;--ok:#2a9d6f;--wa:#e8a020;--da:#c0392b;--pu:#7c3aed;--li:#f4f7fb;--ca:#fff;--tx:#1e2a38;--mu:#6b7a8d;--bo:#dde3ed;--bs:#d1fae5;--bw:#fef3c7;--bd:#fee2e2;--bb:#dbeafe;--bp:#ede9fe;}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',-apple-system,sans-serif;background:var(--li);color:var(--tx);font-size:14px;line-height:1.5}
+.topbar{background:var(--pr);color:#fff;padding:.75rem 1.5rem;display:flex;align-items:center;gap:1rem;position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,.2);flex-wrap:wrap}
+.tb-brand{font-size:15px;font-weight:700}.tb-sub{font-size:11px;opacity:.6;margin-top:1px}.tb-sp{flex:1}
+.wn{display:flex;align-items:center;gap:6px}
+.wn-btn{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);color:#fff;border-radius:6px;padding:4px 10px;cursor:pointer;font-size:12px}
+.wn-btn:hover{background:rgba(255,255,255,.25)}
+.wn-lbl{font-size:12px;font-weight:600;min-width:200px;text-align:center}
+.u-sel{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.22);color:#fff;border-radius:6px;padding:5px 10px;font-size:12px;font-family:inherit}
+.u-sel option{color:var(--tx);background:#fff}
+.main{max-width:1200px;margin:0 auto;padding:1.25rem 1.5rem 3rem}
+.tabs{display:flex;gap:3px;background:var(--ca);border-radius:8px;padding:3px;margin-bottom:1.25rem;border:1px solid var(--bo);overflow-x:auto}
+.tab{padding:7px 16px;border-radius:6px;font-size:13px;cursor:pointer;border:none;background:transparent;color:var(--mu);font-family:inherit;font-weight:500;white-space:nowrap}
+.tab.on{background:var(--se);color:#fff;font-weight:600}
+.tp{display:none}.tp.on{display:block}
+.sr{display:flex;align-items:center;gap:8px;margin-bottom:1rem;flex-wrap:wrap}
+.chip{padding:4px 12px;border-radius:20px;font-size:11.5px;font-weight:600}
+.c-ok{background:var(--bs);color:#065f46}.c-wa{background:var(--bw);color:#78350f}.c-bl{background:var(--bb);color:#1e40af}.c-pu{background:var(--bp);color:var(--pu)}
+.ban{border-radius:8px;padding:.75rem 1rem;margin-bottom:1rem;font-size:12.5px;display:flex;gap:8px;align-items:flex-start}
+.ban-wa{background:var(--bw);border:1px solid #fcd34d;color:#78350f}
+.ban-bl{background:var(--bb);border:1px solid #93c5fd;color:#1e40af}
+.ban-ok{background:var(--bs);border:1px solid #6ee7b7;color:#065f46}
+.sl{font-size:11.5px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--mu);margin:1.25rem 0 .65rem;padding-bottom:.3rem;border-bottom:1px solid var(--bo);display:flex;align-items:center;justify-content:space-between}
+.sl-btn{font-size:12px;font-weight:600;color:var(--se);cursor:pointer;text-transform:none;letter-spacing:0;background:none;border:none;font-family:inherit}
+.metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:10px;margin-bottom:1.25rem}
+.mc{background:var(--ca);border:1px solid var(--bo);border-radius:10px;padding:.875rem 1rem;border-left:4px solid var(--bo)}
+.mc.ok{border-left-color:var(--ok)}.mc.wa{border-left-color:var(--wa)}.mc.da{border-left-color:var(--da)}.mc.bl{border-left-color:var(--se)}.mc.pu{border-left-color:var(--pu)}
+.mv{font-size:26px;font-weight:700;line-height:1}.ml{font-size:10.5px;color:var(--mu);text-transform:uppercase;letter-spacing:.05em;margin-top:3px}.ms{font-size:11px;color:var(--mu);margin-top:2px}
+.card{background:var(--ca);border:1px solid var(--bo);border-radius:10px;padding:1rem 1.25rem;margin-bottom:.85rem}
+.fg{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:.75rem}
+.fc{background:var(--ca);border:1px solid var(--bo);border-radius:10px;padding:.875rem 1rem}
+.fc-t{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--mu);margin-bottom:.6rem;display:flex;align-items:center;justify-content:space-between}
+.fc-n{font-size:16px;font-weight:700}
+.fc-r{display:flex;align-items:center;gap:6px;padding:5px 0;border-bottom:.5px solid var(--bo);font-size:12px}
+.fc-r:last-child{border-bottom:none}
+.fc-c{font-size:10.5px;font-weight:700;color:var(--mu);white-space:nowrap;min-width:60px}
+.fc-nm{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dias{padding:1px 6px;border-radius:8px;font-size:10.5px;font-weight:600;white-space:nowrap}
+.d-r{background:var(--bd);color:#7f1d1d}.d-a{background:var(--bw);color:#78350f}.d-g{background:var(--bs);color:#065f46}
+.cl{display:flex;flex-direction:column;gap:8px}
+.cc{background:var(--ca);border:1px solid var(--bo);border-radius:10px;overflow:hidden}
+.cc:hover{border-color:#b8cde8}
+.cc-h{padding:.75rem 1rem;display:flex;align-items:flex-start;gap:10px;cursor:pointer}
+.cc-ico{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+.i-doc{background:var(--bb)}.i-nc{background:var(--bd)}.i-poa{background:var(--bs)}.i-otro{background:var(--bw)}.i-np{background:var(--bp)}
+.cc-inf{flex:1;min-width:0}
+.cc-tp{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--mu);margin-bottom:2px}
+.cc-nm{font-size:13px;font-weight:600}
+.cc-en{font-size:12px;color:var(--mu);margin-top:2px}
+.cc-tg{display:flex;gap:5px;flex-wrap:wrap;margin-top:4px}
+.cc-rt{display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0}
+.pr{padding:2px 8px;border-radius:10px;font-size:10.5px;font-weight:700}
+.p-a{background:var(--bd);color:#7f1d1d}.p-m{background:var(--bw);color:#78350f}.p-b{background:var(--bs);color:#065f46}
+.sd{width:10px;height:10px;border-radius:50%}
+.sd-p{background:#d1d5db}.sd-ok{background:var(--ok)}.sd-no{background:var(--da)}
+.st-l{font-size:11.5px;font-weight:600}
+.str{font-size:10.5px;font-weight:600;color:var(--da)}
+.cc-b{padding:.75rem 1rem;border-top:.5px solid var(--bo);display:none}
+.cc-b.op{display:block}
+.cau-box{background:var(--bd);border-radius:6px;padding:6px 10px;font-size:12px;color:#7f1d1d;margin-top:4px}
+.sop-box{background:var(--bp);border-radius:6px;padding:6px 10px;font-size:12px;color:var(--pu);margin-top:4px}
+.sop-r{background:var(--bs);border-radius:6px;padding:6px 10px;font-size:12px;color:#065f46;margin-top:4px}
+.cca{display:flex;gap:6px;margin-top:.75rem;flex-wrap:wrap}
+.btn{padding:5px 14px;border-radius:6px;font-size:12.5px;font-weight:600;cursor:pointer;border:none;font-family:inherit}
+.b-ok{background:var(--bs);color:#065f46}.b-ok:hover{background:#a7f3d0}
+.b-no{background:var(--bd);color:#7f1d1d}.b-no:hover{background:#fca5a5}
+.b-pr{background:var(--se);color:#fff}.b-pr:hover{background:var(--pr)}
+.b-sc{background:var(--li);color:var(--se);border:1px solid var(--se)}.b-sc:hover{background:var(--bb)}
+.b-dl{background:var(--li);color:var(--da);border:1px solid #fca5a5}.b-dl:hover{background:var(--bd)}
+.b-sm{padding:4px 10px;font-size:12px}
+.b-ex{background:var(--bs);color:#065f46;padding:5px 14px;border-radius:6px;font-size:12.5px;font-weight:600;cursor:pointer;border:1px solid #6ee7b7;font-family:inherit}
+.b-up{background:var(--pu);color:#fff;padding:5px 14px;border-radius:6px;font-size:12.5px;font-weight:600;cursor:pointer;border:none;font-family:inherit}
+.field{margin-bottom:.65rem}
+.f-l{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--mu);margin-bottom:4px;display:block}
+.f-n{font-size:10.5px;color:var(--mu);margin-top:3px;font-style:italic}
+input[type=text],textarea,.f-s{width:100%;border:1px solid var(--bo);border-radius:6px;padding:7px 10px;font-size:12.5px;font-family:inherit;color:var(--tx);background:var(--ca)}
+input[type=text]:focus,textarea:focus,.f-s:focus{outline:none;border-color:var(--se);box-shadow:0 0 0 2px var(--bb)}
+textarea{resize:none;min-height:60px}
+.tg{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:.75rem}
+.t-btn{padding:.75rem;border:2px solid var(--bo);border-radius:8px;cursor:pointer;text-align:left;background:var(--ca);font-family:inherit}
+.t-btn:hover,.t-btn.sel{border-color:var(--se);background:var(--bb)}
+.t-ico{font-size:18px;margin-bottom:4px}
+.t-nm{font-size:12.5px;font-weight:600}
+.t-dc{font-size:11px;color:var(--mu);margin-top:1px}
+.rl{max-height:150px;overflow-y:auto;border:1px solid var(--bo);border-radius:6px;margin-top:4px}
+.ri{padding:7px 10px;border-bottom:.5px solid var(--bo);cursor:pointer;font-size:12.5px;display:flex;align-items:center;justify-content:space-between;gap:8px}
+.ri:hover{background:var(--li)}.ri.sel{background:var(--bb)}.ri:last-child{border-bottom:none}
+.cr{display:flex;align-items:center;gap:8px;font-size:12.5px;margin:.5rem 0}
+.cr input{width:auto;flex-shrink:0}
+.ov{position:fixed;inset:0;background:rgba(15,25,45,.45);z-index:200;display:none;align-items:center;justify-content:center;padding:1rem}
+.ov.op{display:flex}
+.modal{background:var(--ca);border-radius:12px;width:100%;max-width:540px;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.25)}
+.mh{padding:1rem 1.25rem;border-bottom:1px solid var(--bo);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:var(--ca);z-index:1}
+.mt{font-size:15px;font-weight:700}
+.mc2{background:none;border:none;font-size:18px;cursor:pointer;color:var(--mu);padding:2px 6px;border-radius:4px}
+.mc2:hover{background:var(--li)}
+.mb{padding:1.25rem}
+.mf{padding:.875rem 1.25rem;border-top:1px solid var(--bo);display:flex;gap:8px;justify-content:flex-end;position:sticky;bottom:0;background:var(--ca)}
+.pb-r{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.pb-n{font-size:12.5px;font-weight:600;min-width:90px}
+.pb-ld{font-size:11px;color:var(--mu);min-width:50px}
+.pb-tr{flex:1;height:8px;background:var(--li);border-radius:20px;overflow:hidden;border:1px solid var(--bo)}
+.pb-f{height:8px;border-radius:20px;transition:.4s}
+.pb-p{font-size:12px;font-weight:700;min-width:36px;text-align:right}
+.pb-c{font-size:11px;color:var(--mu);min-width:50px;text-align:right}
+.hw{overflow-x:auto}
+.ht{width:100%;border-collapse:collapse;font-size:12.5px}
+.ht th{text-align:left;padding:7px 10px;font-size:10.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--mu);border-bottom:2px solid var(--bo);background:var(--li);white-space:nowrap}
+.ht td{padding:7px 10px;border-bottom:.5px solid var(--bo);vertical-align:top;line-height:1.4}
+.bdg{display:inline-block;padding:2px 8px;border-radius:12px;font-size:10.5px;font-weight:600}
+.b-gok{background:var(--bs);color:#065f46}.b-gno{background:var(--bd);color:#7f1d1d}.b-gp{background:var(--li);color:var(--mu)}.b-gpu{background:var(--bp);color:var(--pu)}
+.gs{background:var(--ca);border:1px solid var(--bo);border-radius:10px;padding:1rem 1.25rem;margin-bottom:.85rem}
+.gs h3{font-size:13px;font-weight:700;color:var(--se);margin-bottom:.65rem;padding-bottom:.3rem;border-bottom:1px solid var(--bo)}
+.gs ul{padding-left:1.25rem}
+.gs li{font-size:12.5px;margin-bottom:5px;line-height:1.5}
+.gst{display:flex;gap:10px;padding:8px 0;border-bottom:.5px solid var(--bo);align-items:flex-start}
+.gst:last-child{border-bottom:none}
+.gn{width:24px;height:24px;border-radius:50%;background:var(--se);color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;margin-top:1px}
+.gt{font-size:12.5px;line-height:1.5}
+.ap{background:var(--ca);border:1px solid var(--bo);border-radius:10px;margin-bottom:8px;overflow:hidden}
+.ap-h{padding:.75rem 1rem;display:flex;align-items:center;justify-content:space-between;background:var(--li);cursor:pointer}
+.ap-n{font-size:13px;font-weight:700}
+.ap-b{padding:.75rem 1rem;border-top:1px solid var(--bo);display:none}
+.ap-b.op{display:block}
+.ap-r{display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:.5px solid var(--bo);font-size:12.5px}
+.ap-r:last-child{border-bottom:none}
+.adm-ctrl{background:var(--bp);border:1px solid #c4b5fd;border-radius:8px;padding:.75rem 1rem;margin-bottom:1rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap}
+.tgl{position:relative;display:inline-block;width:44px;height:24px}
+.tgl input{opacity:0;width:0;height:0}
+.tgl-s{position:absolute;inset:0;background:#ccc;border-radius:24px;cursor:pointer;transition:.3s}
+.tgl-s:before{content:'';position:absolute;height:18px;width:18px;left:3px;bottom:3px;background:#fff;border-radius:50%;transition:.3s}
+input:checked+.tgl-s{background:var(--pu)}
+input:checked+.tgl-s:before{transform:translateX(20px)}
+.toast{position:fixed;bottom:1.5rem;right:1.5rem;background:var(--pr);color:#fff;padding:.75rem 1.25rem;border-radius:10px;font-size:13px;font-weight:500;box-shadow:0 8px 24px rgba(0,0,0,.2);z-index:300;transform:translateY(80px);opacity:0;transition:.3s;max-width:320px;pointer-events:none}
+.toast.show{transform:translateY(0);opacity:1}
+.t-ok{background:var(--ok)}.t-wa{background:var(--wa);color:var(--tx)}.t-da{background:var(--da)}
+.empty{text-align:center;padding:2rem 1rem;color:var(--mu)}
+.up-zone{border:2px dashed var(--bo);border-radius:8px;padding:1.25rem;text-align:center;margin-bottom:.75rem;cursor:pointer;transition:.15s}
+.up-zone:hover{border-color:var(--se);background:var(--bb)}
+.up-zone.drag{border-color:var(--se);background:var(--bb)}
+@media(max-width:700px){.fg{grid-template-columns:1fr}.metrics{grid-template-columns:repeat(2,1fr)}.tg{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div><div class="tb-brand">📋 Planificación Semanal — SGC</div><div class="tb-sub">Nacional Seguros · Equipo de Calidad</div></div>
+  <span class="tb-sp"></span>
+  <div class="wn">
+    <button class="wn-btn" onclick="chW(-1)">‹</button>
+    <span class="wn-lbl" id="wLbl"></span>
+    <button class="wn-btn" onclick="chW(1)">›</button>
+  </div>
+  <select class="u-sel" id="uSel" onchange="chU()" style="display:none">
+    <option value="admin">👑 Yessica (Admin)</option>
+    <option value="mmontero@nacionalseguros.com.bo">Guadalupe</option>
+    <option value="lcaballero@nacionalseguros.com.bo">Labinia</option>
+    <option value="ylopez@nacionalseguros.com.bo">Yhomara</option>
+    <option value="mbarja@nacionalseguros.com.bo">Mayra</option>
+  </select>
+  <span class="u-sel" id="uLbl" style="display:none"></span>
+</div>
+
+<div class="main">
+<div class="sr" id="sRow"></div>
+
+<div class="tabs">
+  <button class="tab on" onclick="sTab('plan',this)">Mi semana</button>
+  <button class="tab" onclick="sTab('ind',this)">Indicadores</button>
+  <button class="tab" onclick="sTab('hist',this)">Historial</button>
+  <button class="tab" id="tAdm" onclick="sTab('adm',this)" style="display:none">Vista líder</button>
+  <button class="tab" onclick="sTab('guia',this)">Guía de uso</button>
+</div>
+
+<!-- MI SEMANA -->
+<div id="tab-plan" class="tp on">
+  <div id="lkBan" class="ban ban-wa" style="display:none">🔒 La planificación se registra los <strong>lunes</strong>. Podés actualizar el estado de tus compromisos cualquier día de la semana.</div>
+  <div id="offBan" class="ban ban-wa" style="display:none">⚠ Sin conexión a Supabase — mostrando la última copia local. Recargá la página cuando se restablezca la conexión para sincronizar.</div>
+  <div id="admCtrl" style="display:none">
+    <div class="adm-ctrl">
+      <div>
+        <div style="font-size:13px;font-weight:700;color:var(--pu)">⚙ Control de planificación</div>
+        <div style="font-size:12px;color:var(--pu);margin-top:2px">Habilitá la planificación fuera del lunes si es necesario</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <span style="font-size:12.5px;color:var(--pu);font-weight:600">Habilitada</span>
+        <label class="tgl"><input type="checkbox" id="admTog" onchange="toggleAdminOverride(this.checked)"><span class="tgl-s"></span></label>
+      </div>
+    </div>
+  </div>
+
+  <div class="sl">Pendientes de gestión — referencia para planificar
+    <div style="display:flex;gap:8px;align-items:center">
+      <button class="b-up btn b-sm" id="btnUp" onclick="document.getElementById('fUpload').click()">⬆ Actualizar fuentes</button>
+      <input type="file" id="fUpload" accept=".xlsx" style="display:none" onchange="loadFuentes(this)">
+      <button class="sl-btn" onclick="togF()">▾ Mostrar/ocultar</button>
+    </div>
+  </div>
+  <div id="fWrap"><div class="fg" id="fGrid"></div></div>
+  <div id="fNote" class="ban ban-bl" style="display:none">ℹ Cargá el archivo <strong>Fuentes_SGC.xlsx</strong> para ver los pendientes actualizados. El archivo tiene 3 hojas: NC_OM, Documentos y POA.</div>
+
+  <div class="sl">Compromisos de la semana
+    <button class="btn b-pr b-sm" onclick="openMC()">+ Agregar compromiso</button>
+  </div>
+  <div class="cl" id="cList"></div>
+
+  <div class="sl" style="margin-top:1.5rem">Gestiones no previstas
+    <button class="sl-btn" style="color:var(--pu)" onclick="openMNP()">+ Registrar</button>
+  </div>
+  <div class="cl" id="npList"></div>
+</div>
+
+<!-- INDICADORES -->
+<div id="tab-ind" class="tp">
+  <div style="display:flex;justify-content:flex-end;margin-bottom:.75rem">
+    <button class="b-ex" onclick="expCSV()">⬇ Exportar CSV</button>
+  </div>
+  <div class="metrics" id="mRow"></div>
+  <div class="sl">Cumplimiento semanal</div>
+  <div class="card" id="iSem"></div>
+  <div class="sl">Cumplimiento acumulado — mes actual</div>
+  <div class="card" id="iMes"></div>
+  <div class="sl" id="slCar">Carga semanal (compromisos declarados / máximo 5)</div>
+  <div class="card" id="iCar"></div>
+</div>
+
+<!-- HISTORIAL -->
+<div id="tab-hist" class="tp">
+  <div style="display:flex;justify-content:flex-end;margin-bottom:.75rem">
+    <button class="b-ex" onclick="expCSV()">⬇ Exportar CSV</button>
+  </div>
+  <div class="hw">
+    <table class="ht">
+      <thead><tr><th>Semana</th><th>Mes</th><th>Responsable</th><th>Tipo</th><th>Compromiso</th><th>Entregable</th><th>Prioridad</th><th>Estado</th><th>Causa</th><th>Arrastre</th></tr></thead>
+      <tbody id="hBody"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- VISTA LÍDER -->
+<div id="tab-adm" class="tp">
+  <div class="sl">Estado del equipo — semana actual</div>
+  <div id="aView"></div>
+  <div class="sl" style="margin-top:1.5rem">Soportes pendientes de atención</div>
+  <div id="sView"></div>
+  <div class="sl" style="margin-top:1.5rem">Compromisos con arrastre (+2 semanas)</div>
+  <div id="arView"></div>
+</div>
+
+<!-- GUÍA DE USO -->
+<div id="tab-guia" class="tp">
+  <div class="gs">
+    <h3>¿Qué es esta herramienta?</h3>
+    <p style="font-size:12.5px;line-height:1.6">La planificación semanal SGC permite a cada integrante del equipo declarar sus compromisos, registrar entregables concretos y actualizar el estado de cumplimiento. Genera trazabilidad acumulada semana a semana y permite a la jefatura hacer seguimiento sin depender de reuniones de reporte.</p>
+  </div>
+  <div class="gs">
+    <h3>Flujo semanal</h3>
+    <div class="gst"><div class="gn">1</div><div class="gt"><strong>Lunes por la mañana — planificás.</strong> Revisás los pendientes de gestión (documentos, NC/OM, POA) en la sección de referencia. Elegís qué vas a comprometer esta semana, definís el entregable concreto y la prioridad. El entregable queda fijo — no se puede cambiar una vez confirmado. Si cometiste un error, contactá a la administradora para corregirlo.</div></div>
+    <div class="gst"><div class="gn">2</div><div class="gt"><strong>Durante la semana — actualizás el estado.</strong> Cuando cerrás un compromiso, lo marcás como <em>Cumplido</em>. Si surgió algo no planificado que completaste, lo registrás como gestión no prevista con su entregable concreto.</div></div>
+    <div class="gst"><div class="gn">3</div><div class="gt"><strong>Viernes — cerrás lo pendiente.</strong> Si algo no pudiste completar, lo marcás como <em>No concretado</em> e indicás la causa. Este campo es obligatorio.</div></div>
+    <div class="gst"><div class="gn">4</div><div class="gt"><strong>La semana siguiente — arrancás de nuevo.</strong> Lo no concretado queda en el historial. Si el tema sigue vigente, lo comprometés nuevamente. El historial acumula todo.</div></div>
+  </div>
+  <div class="gs">
+    <h3>Entregables válidos por tipo</h3>
+    <ul>
+      <li><strong>Documentos:</strong> Documento publicado en sistema · Documento enviado a aprobación del área</li>
+      <li><strong>NC/OM:</strong> NC/OM cerrada · Tratamiento documentado y comunicado al área · Revisión de evidencias registrada</li>
+      <li><strong>POA:</strong> Informe emitido · Flujo definido y documentado · Capacitación realizada con lista de asistencia · Piloto documentado</li>
+      <li><strong>No cuenta:</strong> "Avanzar en", "revisar", "coordinar", correos de seguimiento sin resultado concreto</li>
+    </ul>
+  </div>
+  <div class="gs">
+    <h3>Soporte al líder</h3>
+    <p style="font-size:12.5px;line-height:1.5">Si necesitás apoyo para avanzar en un compromiso, marcá la opción al agregarlo y describí qué necesitás. La jefatura registra su respuesta. Si no solicitaste soporte, no podés justificar un no concretado por falta de ayuda.</p>
+  </div>
+  <div class="gs">
+    <h3>Indicadores y metas</h3>
+    <ul>
+      <li><strong>% cumplimiento semanal:</strong> cumplidos / declarados × 100 · Meta mínima: ≥ 80%</li>
+      <li><strong>% cumplimiento mensual:</strong> promedio acumulado de semanas del mes · Meta: ≥ 75%</li>
+      <li><strong>Carga semanal:</strong> compromisos declarados vs. máximo de 5 por semana</li>
+      <li><strong>Error en compromiso:</strong> contactá a la administradora para corregirlo</li>
+    </ul>
+  </div>
+  <div class="gs">
+    <h3>Actualización de fuentes de referencia</h3>
+    <p style="font-size:12.5px;line-height:1.5">Cada viernes la administradora actualiza el archivo <strong>Fuentes_SGC.xlsx</strong> con los pendientes del equipo y lo carga usando el botón "Actualizar fuentes" en la pantalla Mi semana. El archivo tiene tres hojas: NC_OM, Documentos y POA.</p>
+  </div>
+</div>
+</div><!-- /main -->
+
+<!-- MODAL COMPROMISO -->
+<div class="ov" id="ovMC">
+  <div class="modal">
+    <div class="mh"><span class="mt">Nuevo compromiso</span><button class="mc2" onclick="closeMC()">✕</button></div>
+    <div class="mb">
+      <div class="field"><span class="f-l">Tipo de gestión <span style="color:var(--da)">*</span></span>
+        <div class="tg">
+          <button class="t-btn" onclick="selT('doc',this)"><div class="t-ico">📄</div><div class="t-nm">Documento</div><div class="t-dc">Publicación o actualización SGC</div></button>
+          <button class="t-btn" onclick="selT('nc',this)"><div class="t-ico">🔴</div><div class="t-nm">NC / OM</div><div class="t-dc">Cierre o tratamiento</div></button>
+          <button class="t-btn" onclick="selT('poa',this)"><div class="t-ico">📋</div><div class="t-nm">Tarea POA</div><div class="t-dc">Entregable planificado</div></button>
+          <button class="t-btn" onclick="selT('otro',this)"><div class="t-ico">⚡</div><div class="t-nm">Otra gestión</div><div class="t-dc">No clasificada arriba</div></button>
+        </div>
+      </div>
+      <div id="rfSec" style="display:none">
+        <div class="field"><span class="f-l">Seleccionar de pendientes <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--mu)">(opcional)</span></span>
+          <div class="rl" id="rfList"></div>
+        </div>
+      </div>
+      <div class="field"><span class="f-l">Compromiso <span style="color:var(--da)">*</span></span>
+        <input type="text" id="fNm" placeholder="Ej: NC-23 — Gestión de talleres mecánicos">
+      </div>
+      <div class="field"><span class="f-l">Entregable esperado <span style="color:var(--da)">*</span></span>
+        <input type="text" id="fEn" placeholder="Ej: NC cerrada con evidencia de acción correctiva">
+        <div class="f-n">Debe ser concreto y verificable. No aceptar: "avanzar en", "revisar", "coordinar".</div>
+      </div>
+      <div class="field"><span class="f-l">Prioridad <span style="color:var(--da)">*</span></span>
+        <select class="f-s" id="fPr"><option value="">— Seleccionar —</option><option value="Alta">Alta</option><option value="Media">Media</option><option value="Baja">Baja</option></select>
+      </div>
+      <div class="cr"><input type="checkbox" id="fSp"><label for="fSp">Requiero apoyo del líder para avanzar</label></div>
+      <div id="spDt" style="display:none">
+        <div class="field"><span class="f-l">¿Qué apoyo necesitás?</span>
+          <textarea id="fSpD" placeholder="Describí qué necesitás y para cuándo"></textarea>
+        </div>
+      </div>
+    </div>
+    <div class="mf">
+      <button class="btn b-sc" onclick="closeMC()">Cancelar</button>
+      <button class="btn b-pr" onclick="saveC()">Confirmar compromiso</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL CAUSA NO CONCRETADO -->
+<div class="ov" id="ovCau">
+  <div class="modal">
+    <div class="mh"><span class="mt">¿Por qué no se concretó?</span><button class="mc2" onclick="closeOv('ovCau')">✕</button></div>
+    <div class="mb">
+      <div class="ban ban-bl" style="margin-bottom:.75rem">ℹ Este campo es obligatorio y queda visible para la jefatura en el historial.</div>
+      <div class="field"><span class="f-l">Causa del no cumplimiento <span style="color:var(--da)">*</span></span>
+        <textarea id="fCau" placeholder="Ej: El área no respondió la solicitud de información. / Urgencia redirigió el tiempo planificado."></textarea>
+      </div>
+    </div>
+    <div class="mf">
+      <button class="btn b-sc" onclick="closeOv('ovCau')">Cancelar</button>
+      <button class="btn b-no" onclick="confNC()">Registrar como no concretado</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL NO PREVISTA -->
+<div class="ov" id="ovNP">
+  <div class="modal">
+    <div class="mh"><span class="mt">Gestión no prevista</span><button class="mc2" onclick="closeOv('ovNP')">✕</button></div>
+    <div class="mb">
+      <div class="ban ban-ok" style="margin-bottom:.75rem">✓ Solo registrá gestiones que completaste — con entregable concreto.</div>
+      <div class="field"><span class="f-l">Descripción <span style="color:var(--da)">*</span></span>
+        <input type="text" id="npNm" placeholder="Ej: Apoyo urgente en auditoría área Siniestros">
+      </div>
+      <div class="field"><span class="f-l">Entregable generado <span style="color:var(--da)">*</span></span>
+        <input type="text" id="npEn" placeholder="Ej: Informe de hallazgos enviado al área">
+      </div>
+      <div class="field"><span class="f-l">Contexto (opcional)</span>
+        <textarea id="npCx" placeholder="¿Por qué surgió? ¿Impactó en algún compromiso planificado?"></textarea>
+      </div>
+    </div>
+    <div class="mf">
+      <button class="btn b-sc" onclick="closeOv('ovNP')">Cancelar</button>
+      <button class="btn b-pr" onclick="saveNP()">Registrar gestión</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL SOPORTE RESPUESTA -->
+<div class="ov" id="ovSp">
+  <div class="modal">
+    <div class="mh"><span class="mt">Registrar respuesta de apoyo</span><button class="mc2" onclick="closeOv('ovSp')">✕</button></div>
+    <div class="mb">
+      <div id="spRqBox" class="sop-box" style="margin-bottom:.75rem"></div>
+      <div class="field"><span class="f-l">Apoyo brindado <span style="color:var(--da)">*</span></span>
+        <textarea id="fSpR" placeholder="Describí el apoyo dado, fecha y resultado"></textarea>
+      </div>
+    </div>
+    <div class="mf">
+      <button class="btn b-sc" onclick="closeOv('ovSp')">Cancelar</button>
+      <button class="btn b-ok" onclick="saveSpR()">Guardar respuesta</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<div class="ov" id="ovLoad" style="z-index:400">
+  <div class="modal" style="max-width:340px;text-align:center;padding:2.5rem 1.5rem">
+    <div style="font-size:28px;margin-bottom:.5rem">📋</div>
+    <div id="loadMsg" style="font-size:13px;color:var(--mu);font-weight:600">Iniciando…</div>
+  </div>
+</div>
+
+<div class="ov op" id="ovLogin" style="z-index:410">
+  <div class="modal" style="max-width:340px;padding:2rem 1.5rem">
+    <div style="text-align:center;font-size:28px;margin-bottom:.25rem">🔐</div>
+    <div style="text-align:center;font-size:14px;font-weight:700;margin-bottom:1.25rem">Planificación Semanal — SGC</div>
+    <div class="field">
+      <span class="f-l">Usuario</span>
+      <select class="f-s" id="loginUser">
+        <option value="admin">Yessica (Administradora)</option>
+        <option value="mmontero@nacionalseguros.com.bo">Guadalupe</option>
+        <option value="lcaballero@nacionalseguros.com.bo">Labinia</option>
+        <option value="ylopez@nacionalseguros.com.bo">Yhomara</option>
+        <option value="mbarja@nacionalseguros.com.bo">Mayra</option>
+      </select>
+    </div>
+    <div class="field">
+      <span class="f-l">PIN</span>
+      <input type="text" id="loginPin" inputmode="numeric" maxlength="6" placeholder="••••">
+    </div>
+    <div id="loginErr" style="display:none;color:var(--da);font-size:12px;margin-bottom:.5rem"></div>
+    <button class="btn b-pr" style="width:100%;padding:8px" onclick="loginSubmit()">Ingresar</button>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script>
+// ── USUARIOS ─────────────────────────────────────────────────
+const UMAP = {
+  'admin':                          {n:'Yessica',  short:'YG'},
+  'mmontero@nacionalseguros.com.bo':{n:'Guadalupe',short:'GM'},
+  'lcaballero@nacionalseguros.com.bo':{n:'Labinia',short:'LC'},
+  'ylopez@nacionalseguros.com.bo':  {n:'Yhomara',  short:'YL'},
+  'mbarja@nacionalseguros.com.bo':  {n:'Mayra',    short:'MV'},
+  'ygarcia@nacionalseguros.com.bo': {n:'Yessica',  short:'YG'},
+};
+const USERS_EMAIL = ['mmontero@nacionalseguros.com.bo','lcaballero@nacionalseguros.com.bo','ylopez@nacionalseguros.com.bo','mbarja@nacionalseguros.com.bo'];
+const TIPOS = {doc:{l:'Documento',i:'📄'},nc:{l:'NC/OM',i:'🔴'},poa:{l:'POA',i:'📋'},otro:{l:'Otra gestión',i:'⚡'}};
+const PCLS = {Alta:'p-a',Media:'p-m',Baja:'p-b'};
+const ADMIN_EMAIL = 'ygarcia@nacionalseguros.com.bo';
+
+// ── CONFIG SUPABASE ────────────────────────────────────────────
+// Project URL y clave pública ("anon"/"publishable") del proyecto Supabase.
+// Es intencional que esta clave sea pública: solo permite lo que las políticas
+// RLS de las tablas autoricen. Mientras el piloto corre con RLS deshabilitado,
+// cualquier persona con esta clave puede leer/escribir las tablas — aceptado
+// como riesgo temporal de la fase de validación (ver Guía de uso > Seguridad).
+const SUPABASE_URL = 'https://khaalvprukdruqrhfqmr.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_50SMmPSi3lf3-4P4f8_68A__bQu-ae9';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// ── FUENTES (se cargan desde Excel) ──────────────────────────
+let FUENTES = {doc:[], nc:[], poa:[]};
+let fuentesCargadas = false;
+
+// ── ESTADO ───────────────────────────────────────────────────
+let S = {
+  user:null, wo:0,
+  selTipo:null, pendCauId:null, pendSpId:null,
+  comps:[], nps:[], nid:1,
+  cfg:{maxComp:5, diaPlan:'Lunes', adminOverride:false, metaSem:80, metaMes:75},
+  online:true, authMode:null,
+};
+
+// ── WEEK / DATE ───────────────────────────────────────────────
+function getWk(off=0){
+  const now=new Date();
+  const day=now.getDay();
+  const diff=now.getDate()-day+(day===0?-6:1);
+  const mon=new Date(now); mon.setDate(diff+off*7);
+  const fri=new Date(mon); fri.setDate(fri.getDate()+4);
+  return {mon,fri};
+}
+function fmt(d){return d.toLocaleDateString('es-BO',{day:'2-digit',month:'short'});}
+function wkLbl(o){
+  const {mon,fri}=getWk(o);
+  if(o===0) return `Semana actual · ${fmt(mon)} – ${fmt(fri)}`;
+  if(o===-1) return `Semana anterior · ${fmt(mon)} – ${fmt(fri)}`;
+  return `${fmt(mon)} – ${fmt(fri)}`;
+}
+function wkMes(o){
+  const {fri}=getWk(o);
+  return fri.toLocaleDateString('es-BO',{month:'long',year:'numeric'});
+}
+function isMon(){return new Date().getDay()===1;}
+function isPastWk(o){return o<0;}
+function planEnabled(){
+  if(S.user==='admin') return true;
+  return isMon()||S.cfg.adminOverride;
+}
+function uName(email){return (UMAP[email]||{}).n||email;}
+
+// ── AUTENTICACIÓN (PIN contra Supabase) ─────────────────────────
+function setLoadMsg(msg){const el=document.getElementById('loadMsg');if(el)el.textContent=msg;}
+function hideLoader(){const el=document.getElementById('ovLoad');if(el)el.classList.remove('op');}
+
+async function loginSubmit(){
+  const sel=document.getElementById('loginUser').value;
+  const pin=document.getElementById('loginPin').value.trim();
+  const errEl=document.getElementById('loginErr');
+  errEl.style.display='none';
+  if(!pin){ errEl.textContent='Ingresá tu PIN.'; errEl.style.display=''; return; }
+  const email = sel==='admin'?ADMIN_EMAIL:sel;
+  try{
+    const {data,error}=await sb.from('usuarios').select('*').eq('email',email).eq('pin',pin).eq('activo',true).maybeSingle();
+    if(error) throw error;
+    if(!data){ errEl.textContent='PIN incorrecto o usuario inactivo.'; errEl.style.display=''; return; }
+    S.user=sel; S.authMode='ok';
+    document.getElementById('ovLogin').classList.remove('op');
+    document.getElementById('ovLoad').classList.add('op');
+    setLoadMsg('Cargando datos…');
+    await loadBBDD();
+    hideLoader();
+    render();
+  }catch(err){
+    console.error('Error validando PIN contra Supabase', err);
+    errEl.textContent='No se pudo validar el PIN (revisá tu conexión).';
+    errEl.style.display='';
+  }
+}
+
+// ── Configuración por defecto y mapeo de parámetros ─────────────
+function defaultCfg(){return {maxComp:5,diaPlan:'Lunes',adminOverride:false,metaSem:80,metaMes:75};}
+function applyCfg(p,v){
+  if(p==='max_compromisos_semana') S.cfg.maxComp=Number(v)||5;
+  else if(p==='planificacion_dia') S.cfg.diaPlan=v;
+  else if(p==='planificacion_admin_override') S.cfg.adminOverride=String(v).toUpperCase()==='TRUE';
+  else if(p==='meta_cumplimiento') S.cfg.metaSem=Number(v)||80;
+}
+
+// ── Mapeo filas de Supabase ↔ objetos internos ──────────────────
+function rowToComp(row){
+  return {id:row.id,user:row.email,wo:row.semana_offset,tipo:row.tipo,nm:row.nombre_compromiso,en:row.entregable,
+    pr:row.prioridad,st:row.estado,sp:!!row.soporte_solicitado,spD:row.soporte_descripcion||'',spR:row.soporte_respuesta||'',
+    cau:row.causa_noconcretado||'',streak:row.semanas_arrastre||0};
+}
+function rowToNp(row){
+  return {id:row.id,user:row.email,wo:row.semana_offset,nm:row.nombre_gestion,en:row.entregable,cx:row.contexto||''};
+}
+function fuenteToItem(f){return {c:f.codigo,n:f.nombre,r:f.responsable_email,d:f.dias_pendiente};}
+
+// ── Carga inicial de la BBDD desde Supabase ─────────────────────
+async function loadBBDD(){
+  try{
+    const [compRes,npRes,cfgRes,fntRes]=await Promise.all([
+      sb.from('compromisos').select('*'),
+      sb.from('no_previstas').select('*'),
+      sb.from('configuracion').select('*'),
+      sb.from('fuentes').select('*'),
+    ]);
+    if(compRes.error) throw compRes.error;
+    if(npRes.error) throw npRes.error;
+    if(cfgRes.error) throw cfgRes.error;
+    if(fntRes.error) throw fntRes.error;
+    S.comps = compRes.data.map(rowToComp);
+    S.nps = npRes.data.map(rowToNp);
+    S.cfg = defaultCfg();
+    cfgRes.data.forEach(r=>applyCfg(r.parametro,r.valor));
+    FUENTES = {
+      doc: fntRes.data.filter(f=>f.tipo==='doc').map(fuenteToItem),
+      nc:  fntRes.data.filter(f=>f.tipo==='nc').map(fuenteToItem),
+      poa: fntRes.data.filter(f=>f.tipo==='poa').map(fuenteToItem),
+    };
+    fuentesCargadas = fntRes.data.length>0;
+    S.online = true;
+    localStorage.setItem('sgc_cache', JSON.stringify({comps:S.comps,nps:S.nps,cfg:S.cfg,fuentes:FUENTES,fuentesCargadas,ts:Date.now()}));
+  }catch(err){
+    console.error('Error leyendo Supabase', err);
+    S.online = false;
+    toast('⚠ Sin conexión a Supabase — mostrando última copia local','t-wa');
+    const cache = JSON.parse(localStorage.getItem('sgc_cache')||'null');
+    if(cache){ S.comps=cache.comps; S.nps=cache.nps; S.cfg=cache.cfg; FUENTES=cache.fuentes||{doc:[],nc:[],poa:[]}; fuentesCargadas=!!cache.fuentesCargadas; }
+    else { S.comps=[]; S.nps=[]; S.cfg=defaultCfg(); FUENTES={doc:[],nc:[],poa:[]}; fuentesCargadas=false; }
+  }
+}
+
+// ── CARGA DE FUENTES DESDE EXCEL ─────────────────────────────
+function calcDias(fechaVal){
+  if(!fechaVal) return null;
+  const fecha=fechaVal instanceof Date?fechaVal:new Date(fechaVal);
+  if(isNaN(fecha)) return null;
+  const hoy=new Date();
+  return Math.floor((hoy-fecha)/(1000*60*60*24));
+}
+// Asuntos reales vienen como "NC - 23 Gestión de talleres…" u "OM - AE - 41 …" (sin nombre a veces, ej. "OM - 219")
+const NC_CODE_RE = /^((?:NC|OM|Rev)(?:\s*-\s*[A-ZÀ-Ú0-9]+)+)\s*(.*)$/;
+function splitAsunto(asunto){
+  const a=(asunto||'').trim();
+  const m=a.match(NC_CODE_RE);
+  if(m){ const code=m[1].trim(), name=m[2].trim(); return {c:code,n:name||code}; }
+  return {c:a.slice(0,12),n:a};
+}
+function loadFuentes(input){
+  const file = input.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e){
+    try{
+      const wb = XLSX.read(e.target.result,{type:'array',cellDates:true});
+      const faltantes = ['NC_OM','Documentos','POA'].filter(h=>!wb.Sheets[h]);
+      if(faltantes.length){
+        toast('El archivo no tiene las hojas: '+faltantes.join(', '),'t-da');
+        input.value='';
+        return;
+      }
+
+      // NC_OM — filtrar solo Pendiente, En proceso, Vencida (NO Cerrada)
+      const nc = XLSX.utils.sheet_to_json(wb.Sheets['NC_OM']);
+      const nuevoNc = nc
+        .filter(r=>['pendiente','en proceso','vencida'].includes(String(r.Estado_real||'').trim().toLowerCase()))
+        .map(r=>{
+          const {c,n}=splitAsunto(r.Asunto);
+          return {c, n, r:r.Responsable_de_Calidad, d:calcDias(r.Fecha_Plazo)};
+        });
+
+      // Documentos — excluir Deposito = Concluido/Concluidos
+      const docs = XLSX.utils.sheet_to_json(wb.Sheets['Documentos']);
+      const nuevoDoc = docs
+        .filter(r=>!['concluido','concluidos'].includes(String(r.Deposito||'').trim().toLowerCase()))
+        .map(r=>({
+          c:(r.Nombre_de_la_tarea||'').substring(0,10),
+          n:r.Nombre_de_la_tarea||'',
+          r:r.Responsable_de_Calidad,
+          d:calcDias(r.Fecha_de_creacion),
+        }));
+
+      // POA — filtrar Ejecutado
+      const poa = XLSX.utils.sheet_to_json(wb.Sheets['POA']);
+      const nuevoPoa = poa
+        .filter(r=>String(r.Estado||'').trim().toLowerCase()!=='ejecutado')
+        .map(r=>({
+          c:'POA',
+          n:r.Tema||'',
+          r:r.Responsable_de_Calidad,
+          d:null,
+        }));
+
+      persistFuentes(nuevoDoc, nuevoNc, nuevoPoa, file.name);
+    }catch(err){
+      toast('Error al leer el archivo: '+err.message,'t-da');
+    }
+  };
+  reader.readAsArrayBuffer(file);
+  input.value='';
+}
+
+// ── Persistir Fuentes en Supabase (reemplaza el snapshot semanal completo) ──
+async function persistFuentes(doc,nc,poa,fname){
+  try{
+    const {error:delErr}=await sb.from('fuentes').delete().gte('id',0);
+    if(delErr) throw delErr;
+    const rows=[
+      ...doc.map(f=>({tipo:'doc',codigo:f.c,nombre:f.n,responsable_email:f.r,dias_pendiente:f.d})),
+      ...nc.map(f=>({tipo:'nc',codigo:f.c,nombre:f.n,responsable_email:f.r,dias_pendiente:f.d})),
+      ...poa.map(f=>({tipo:'poa',codigo:f.c,nombre:f.n,responsable_email:f.r,dias_pendiente:f.d})),
+    ];
+    if(rows.length){ const {error:insErr}=await sb.from('fuentes').insert(rows); if(insErr) throw insErr; }
+    FUENTES={doc,nc,poa}; fuentesCargadas=true;
+    document.getElementById('fNote').style.display='none';
+    render();
+    toast('✓ Fuentes actualizadas y sincronizadas: '+fname,'t-ok');
+  }catch(err){
+    console.error('Error sincronizando fuentes en Supabase', err);
+    FUENTES={doc,nc,poa}; fuentesCargadas=true;
+    document.getElementById('fNote').style.display='none';
+    render();
+    toast('⚠ Se leyó el archivo pero no se sincronizó con Supabase','t-da');
+  }
+}
+
+// ── RENDER ────────────────────────────────────────────────────
+function render(){
+  document.getElementById('wLbl').textContent=wkLbl(S.wo);
+  renderStatus();
+  renderFuentes();
+  renderComps();
+  renderNPs();
+  renderInd();
+  renderHist();
+  renderAdm();
+  document.getElementById('tAdm').style.display=S.user==='admin'?'':'none';
+  document.getElementById('admCtrl').style.display=S.user==='admin'?'':'none';
+  document.getElementById('lkBan').style.display=(!planEnabled()&&S.wo===0&&S.user!=='admin')?'':'none';
+  document.getElementById('btnUp').style.display=S.user==='admin'?'':'none';
+  document.getElementById('offBan').style.display=S.online?'none':'';
+  document.getElementById('uSel').style.display=S.user==='admin'?'':'none';
+  document.getElementById('uLbl').style.display=S.user==='admin'?'none':'';
+  document.getElementById('uLbl').textContent='👤 '+uName(S.user);
+  if(document.getElementById('uSel').value!==S.user) document.getElementById('uSel').value=S.user;
+  const admTogEl=document.getElementById('admTog');
+  if(admTogEl) admTogEl.checked=S.cfg.adminOverride;
+  if(!fuentesCargadas) document.getElementById('fNote').style.display='';
+  else document.getElementById('fNote').style.display='none';
+}
+
+function renderStatus(){
+  const chips=[
+    `<span class="chip c-bl">📅 ${wkLbl(S.wo)}</span>`,
+    `<span class="chip c-bl">📆 ${wkMes(S.wo)}</span>`,
+    planEnabled()?`<span class="chip c-ok">✓ Planificación habilitada</span>`:`<span class="chip c-wa">🔒 Solo lunes</span>`,
+    S.user==='admin'?`<span class="chip c-pu">👑 Administradora</span>`:'',
+  ];
+  document.getElementById('sRow').innerHTML=chips.join('');
+}
+
+function renderFuentes(){
+  const u=S.user==='admin'?null:S.user;
+  const filt=arr=>u?arr.filter(f=>f.r===u):arr;
+  const dC=d=>d===null?'':d>180?'d-r':d>60?'d-a':'d-g';
+  const secs=[
+    {t:'📄 Documentos en cola',items:filt(FUENTES.doc)},
+    {t:'🔴 NC/OM activas',     items:filt(FUENTES.nc)},
+    {t:'📋 POA pendiente',     items:filt(FUENTES.poa)},
+  ];
+  document.getElementById('fGrid').innerHTML=secs.map(s=>`
+    <div class="fc">
+      <div class="fc-t">${s.t}<span class="fc-n" style="color:${s.items.length>3?'var(--da)':'var(--ok)'}">${s.items.length}</span></div>
+      ${s.items.length===0
+        ?'<div style="font-size:12px;color:var(--mu);font-style:italic;padding:6px 0">Sin pendientes asignados</div>'
+        :s.items.slice(0,4).map(f=>`<div class="fc-r">
+          <span class="fc-c">${f.c}</span>
+          <span class="fc-nm">${f.n}</span>
+          ${f.d!==null?`<span class="dias ${dC(f.d)}">${f.d}d</span>`:''}
+        </div>`).join('')}
+      ${s.items.length>4?`<div style="font-size:11px;color:var(--mu);margin-top:4px">+${s.items.length-4} más</div>`:''}
+    </div>`).join('');
+}
+
+function togF(){const w=document.getElementById('fWrap');w.style.display=w.style.display==='none'?'':'none';}
+
+function renderComps(){
+  const u=S.user==='admin'?null:S.user;
+  const items=S.comps.filter(c=>c.wo===S.wo&&(u===null||c.user===u));
+  const el=document.getElementById('cList');
+  if(!items.length){el.innerHTML=`<div class="empty"><div style="font-size:32px;margin-bottom:.5rem">📭</div><p>Sin compromisos para esta semana.</p></div>`;return;}
+  el.innerHTML=items.sort((a,b)=>{const p={Alta:0,Media:1,Baja:2};return(p[a.pr]||1)-(p[b.pr]||1);}).map(c=>{
+    const sC=c.st==='ok'?'sd-ok':c.st==='no'?'sd-no':'sd-p';
+    const sT={ok:'Cumplido',no:'No concretado',pending:'Pendiente'}[c.st]||'Pendiente';
+    const sCol=c.st==='ok'?'var(--ok)':c.st==='no'?'var(--da)':'var(--mu)';
+    const canAct=!isPastWk(c.wo)&&(S.user==='admin'||S.user===c.user);
+    const canDel=S.user==='admin'&&!isPastWk(c.wo);
+    return `<div class="cc" id="cc${c.id}">
+      <div class="cc-h" onclick="togCC(${c.id})">
+        <div class="cc-ico i-${c.tipo}">${TIPOS[c.tipo].i}</div>
+        <div class="cc-inf">
+          <div class="cc-tp">${TIPOS[c.tipo].l} · ${uName(c.user)}</div>
+          <div class="cc-nm">${c.nm}</div>
+          <div class="cc-en">↳ ${c.en}</div>
+          <div class="cc-tg">
+            <span class="pr ${PCLS[c.pr]||'p-m'}">${c.pr||'—'}</span>
+            ${c.sp?'<span class="chip c-pu" style="font-size:10px;padding:2px 7px">🙋 Soporte solicitado</span>':''}
+            ${c.streak>=2?`<span class="str">⚠ ${c.streak} sem. sin concretar</span>`:''}
+          </div>
+        </div>
+        <div class="cc-rt">
+          <div class="sd ${sC}"></div>
+          <div class="st-l" style="color:${sCol}">${sT}</div>
+        </div>
+      </div>
+      <div class="cc-b" id="cb${c.id}">
+        ${c.st==='no'&&c.cau?`<div class="cau-box">Causa: ${c.cau}</div>`:''}
+        ${c.sp?`<div class="sop-box">🙋 ${c.spD}</div>
+          ${c.spR?`<div class="sop-r">✓ Líder: ${c.spR}</div>`:
+            S.user==='admin'?`<button class="btn b-sc b-sm" style="margin-top:6px" onclick="openSpR(${c.id})">Registrar respuesta de apoyo</button>`:''}
+        `:''}
+        ${canAct&&c.st==='pending'?`<div class="cca">
+          <button class="btn b-ok b-sm" onclick="mkOk(${c.id})">✓ Cumplido</button>
+          <button class="btn b-no b-sm" onclick="openCau(${c.id})">✗ No concretado</button>
+        </div>`:''}
+        ${canDel?`<button class="btn b-dl b-sm" style="margin-top:6px" onclick="delC(${c.id})">Eliminar compromiso</button>`:''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderNPs(){
+  const u=S.user==='admin'?null:S.user;
+  const items=S.nps.filter(n=>n.wo===S.wo&&(u===null||n.user===u));
+  const el=document.getElementById('npList');
+  if(!items.length){el.innerHTML=`<div class="empty" style="padding:1rem"><div style="font-size:22px">⚡</div><p style="font-size:12px;margin-top:.25rem">Sin gestiones no previstas esta semana.</p></div>`;return;}
+  el.innerHTML=items.map(n=>`<div class="cc"><div class="cc-h" style="cursor:default">
+    <div class="cc-ico i-np">⚡</div>
+    <div class="cc-inf">
+      <div class="cc-tp">No prevista · ${uName(n.user)}</div>
+      <div class="cc-nm">${n.nm}</div>
+      <div class="cc-en">↳ ${n.en}</div>
+      ${n.cx?`<div style="font-size:11.5px;color:var(--mu);margin-top:2px;font-style:italic">${n.cx}</div>`:''}
+    </div>
+    <span class="bdg b-gpu">No prevista</span>
+  </div></div>`).join('');
+}
+
+function renderInd(){
+  const cS=(u,wo)=>{const it=S.comps.filter(c=>c.user===u&&c.wo===wo);const ok=it.filter(c=>c.st==='ok').length;return{tot:it.length,ok,pct:it.length?Math.round(ok/it.length*100):null};};
+  const cM=u=>{let t=0,ok=0;for(let w=-4;w<=0;w++){const {fri}=getWk(w);const {fri:f0}=getWk(S.wo);if(fri.getMonth()===f0.getMonth()){const s=cS(u,w);t+=s.tot;ok+=s.ok;}}return t?Math.round(ok/t*100):null;};
+  const col=p=>p===null?'#ccc':p>=80?'var(--ok)':p>=50?'var(--wa)':'var(--da)';
+  const all=S.comps.filter(c=>c.wo===S.wo);
+  const okT=all.filter(c=>c.st==='ok').length;
+  const noT=all.filter(c=>c.st==='no').length;
+  const spT=all.filter(c=>c.sp&&!c.spR).length;
+  const arT=S.comps.filter(c=>c.streak>=2).length;
+  document.getElementById('mRow').innerHTML=`
+    <div class="mc bl"><div class="mv">${all.length}</div><div class="ml">Compromisos semana</div><div class="ms">${okT} cumplidos · ${noT} no conc.</div></div>
+    <div class="mc ok"><div class="mv">${all.length?Math.round(okT/all.length*100):0}%</div><div class="ml">Cumplimiento equipo</div><div class="ms">Meta ≥ ${S.cfg.metaSem}%</div></div>
+    <div class="mc wa"><div class="mv">${spT}</div><div class="ml">Soportes pendientes</div><div class="ms">Sin respuesta</div></div>
+    <div class="mc da"><div class="mv">${arT}</div><div class="ml">Con arrastre</div><div class="ms">+2 sem. sin concretar</div></div>`;
+  const bRow=(u,sem,car)=>`<div class="pb-r">
+    <span class="pb-n">${uName(u)}</span>
+    <span class="pb-ld" style="color:${car>S.cfg.maxComp?'var(--da)':car>=3?'var(--ok)':'var(--wa)'}">${car}/${S.cfg.maxComp}</span>
+    <div class="pb-tr"><div class="pb-f" style="width:${sem||0}%;background:${col(sem)}"></div></div>
+    <span class="pb-p" style="color:${col(sem)}">${sem!==null?sem+'%':'—'}</span>
+    <span class="pb-c">${S.comps.filter(c=>c.user===u&&c.wo===S.wo&&c.st==='ok').length}/${S.comps.filter(c=>c.user===u&&c.wo===S.wo).length}</span>
+  </div>`;
+  document.getElementById('iSem').innerHTML=USERS_EMAIL.map(u=>{const s=cS(u,S.wo);const car=S.comps.filter(c=>c.user===u&&c.wo===S.wo).length;return bRow(u,s.pct,car);}).join('');
+  document.getElementById('iMes').innerHTML=USERS_EMAIL.map(u=>{const m=cM(u);return`<div class="pb-r">
+    <span class="pb-n">${uName(u)}</span><span class="pb-ld" style="color:var(--mu)">mes</span>
+    <div class="pb-tr"><div class="pb-f" style="width:${m||0}%;background:${col(m)}"></div></div>
+    <span class="pb-p" style="color:${col(m)}">${m!==null?m+'%':'—'}</span>
+    <span class="pb-c">prom. sem.</span></div>`;}).join('');
+  const slCarEl=document.getElementById('slCar');if(slCarEl)slCarEl.textContent=`Carga semanal (compromisos declarados / máximo ${S.cfg.maxComp})`;
+  document.getElementById('iCar').innerHTML=USERS_EMAIL.map(u=>{const car=S.comps.filter(c=>c.user===u&&c.wo===S.wo).length;const p=Math.round(car/S.cfg.maxComp*100);const c2=car>S.cfg.maxComp?'var(--da)':car>=3?'var(--ok)':'var(--wa)';return`<div class="pb-r">
+    <span class="pb-n">${uName(u)}</span><span class="pb-ld" style="color:${c2}">${car}/${S.cfg.maxComp}</span>
+    <div class="pb-tr"><div class="pb-f" style="width:${Math.min(p,100)}%;background:${c2}"></div></div>
+    <span class="pb-p" style="color:${c2}">${car}</span>
+    <span class="pb-c">${car===0?'⚠ vacío':car<3?'⚠ baja':car>S.cfg.maxComp?'⚠ alta':'✓ ok'}</span></div>`;}).join('');
+}
+
+function renderHist(){
+  const u=S.user==='admin'?null:S.user;
+  const items=S.comps.filter(c=>c.wo<=0&&(u===null||c.user===u)).sort((a,b)=>b.wo-a.wo||a.user.localeCompare(b.user));
+  const tb=document.getElementById('hBody');
+  if(!items.length){tb.innerHTML='<tr><td colspan="10" style="text-align:center;color:var(--mu);padding:16px">Sin historial aún</td></tr>';return;}
+  tb.innerHTML=items.map(c=>{
+    const wl=c.wo===0?'Semana actual':`S${Math.abs(c.wo)} anterior`;
+    const sb=c.st==='ok'?'<span class="bdg b-gok">Cumplido</span>':c.st==='no'?'<span class="bdg b-gno">No concretado</span>':'<span class="bdg b-gp">Pendiente</span>';
+    const str=c.streak>=2?`<span style="color:var(--da);font-weight:600">⚠ ${c.streak} sem.</span>`:'—';
+    return`<tr><td>${wl}</td><td style="font-size:11.5px;color:var(--mu)">${wkMes(c.wo)}</td><td><strong>${uName(c.user)}</strong></td><td>${TIPOS[c.tipo].i} ${TIPOS[c.tipo].l}</td><td>${c.nm}</td><td style="font-size:12px">${c.en}</td><td><span class="pr ${PCLS[c.pr]||'p-m'}">${c.pr||'—'}</span></td><td>${sb}</td><td style="font-size:12px;color:var(--mu)">${c.cau||'—'}</td><td>${str}</td></tr>`;
+  }).join('');
+}
+
+function renderAdm(){
+  if(S.user!=='admin') return;
+  document.getElementById('aView').innerHTML=USERS_EMAIL.map(u=>{
+    const it=S.comps.filter(c=>c.user===u&&c.wo===S.wo);
+    const ok=it.filter(c=>c.st==='ok').length,no=it.filter(c=>c.st==='no').length,pnd=it.filter(c=>c.st==='pending').length;
+    return`<div class="ap"><div class="ap-h" onclick="togAP('${u}')">
+      <span class="ap-n">${uName(u)}</span>
+      <div style="display:flex;gap:6px">
+        <span class="bdg b-gok">${ok} cumpl.</span>
+        <span class="bdg b-gno">${no} no conc.</span>
+        <span class="bdg b-gp">${pnd} pend.</span>
+        <span style="font-size:12px;font-weight:600;color:${it.length?'var(--ok)':'var(--mu)'}">${it.length?Math.round(ok/it.length*100)+'%':'—'}</span>
+      </div>
+    </div>
+    <div class="ap-b" id="ap-${u.replace(/@/g,'_').replace(/\./g,'_')}">
+      ${it.length===0?'<div style="font-size:12px;color:var(--mu);font-style:italic">Sin compromisos registrados</div>':
+        it.sort((a,b)=>{const p={Alta:0,Media:1,Baja:2};return(p[a.pr]||1)-(p[b.pr]||1);}).map(c=>`<div class="ap-r">
+          ${TIPOS[c.tipo].i}
+          <span class="pr ${PCLS[c.pr]||'p-m'}" style="font-size:10px">${c.pr}</span>
+          <span style="flex:1">${c.nm}</span>
+          ${c.sp?'<span class="bdg b-gpu">🙋</span>':''}
+          ${c.streak>=2?`<span style="color:var(--da);font-size:10.5px;font-weight:600">⚠${c.streak}s</span>`:''}
+          <span class="bdg ${c.st==='ok'?'b-gok':c.st==='no'?'b-gno':'b-gp'}">${{ok:'✓',no:'✗',pending:'…'}[c.st]}</span>
+        </div>`).join('')}
+    </div></div>`;
+  }).join('');
+  const sops=S.comps.filter(c=>c.sp&&!c.spR&&c.wo===S.wo);
+  document.getElementById('sView').innerHTML=sops.length
+    ?sops.map(c=>`<div style="background:var(--bp);border:1px solid #c4b5fd;border-radius:8px;padding:.75rem 1rem;margin-bottom:8px">
+        <strong>${uName(c.user)}</strong> · ${c.nm}<br>
+        <span style="color:var(--pu);font-size:12.5px">${c.spD}</span>
+        <br><button class="btn b-sc b-sm" style="margin-top:6px" onclick="openSpR(${c.id})">Registrar respuesta</button>
+      </div>`).join('')
+    :'<div class="empty" style="padding:1rem"><div style="font-size:20px">✓</div><p style="font-size:12px">Sin soportes pendientes.</p></div>';
+  const arr=S.comps.filter(c=>c.streak>=2);
+  document.getElementById('arView').innerHTML=arr.length
+    ?arr.map(c=>`<div style="background:var(--bw);border:1px solid #fcd34d;border-radius:8px;padding:.75rem 1rem;margin-bottom:8px;font-size:12.5px">
+        <strong>${uName(c.user)}</strong> · ${c.nm} · <span style="color:var(--da);font-weight:600">${c.streak} semanas sin concretar</span>
+        ${c.cau?`<br><span style="color:var(--mu)">Última causa: ${c.cau}</span>`:''}
+      </div>`).join('')
+    :'<div class="empty" style="padding:1rem"><div style="font-size:20px">✓</div><p style="font-size:12px">Sin compromisos con arrastre.</p></div>';
+}
+
+// ── ACCIONES ─────────────────────────────────────────────────
+function chU(){S.user=document.getElementById('uSel').value;render();}
+function chW(d){S.wo+=d;render();}
+function sTab(id,btn){document.querySelectorAll('.tp').forEach(p=>p.classList.remove('on'));document.querySelectorAll('.tab').forEach(b=>b.classList.remove('on'));document.getElementById('tab-'+id).classList.add('on');btn.classList.add('on');}
+function togCC(id){document.getElementById('cb'+id).classList.toggle('op');}
+function togAP(u){const key='ap-'+u.replace(/@/g,'_').replace(/\./g,'_');document.getElementById(key).classList.toggle('op');}
+function closeOv(id){document.getElementById(id).classList.remove('op');}
+function mkOk(id){const c=S.comps.find(x=>x.id===id);if(!c)return;c.st='ok';c.streak=0;toast('✓ Marcado como cumplido','t-ok');render();
+  sb.from('compromisos').update({estado:'ok',semanas_arrastre:0,fecha_actualizacion:new Date().toISOString()}).eq('id',id)
+    .then(({error})=>{ if(error){console.error(error);toast('⚠ No se pudo sincronizar con Supabase','t-wa');} });
+}
+function openCau(id){S.pendCauId=id;document.getElementById('fCau').value='';document.getElementById('ovCau').classList.add('op');}
+function confNC(){const cau=document.getElementById('fCau').value.trim();if(!cau){toast('La causa es obligatoria','t-wa');return;}const c=S.comps.find(x=>x.id===S.pendCauId);if(c){c.st='no';c.cau=cau;c.streak=(c.streak||0)+1;}closeOv('ovCau');toast('Registrado como no concretado','t-da');render();
+  if(c) sb.from('compromisos').update({estado:'no',causa_noconcretado:cau,semanas_arrastre:c.streak,fecha_actualizacion:new Date().toISOString()}).eq('id',c.id)
+    .then(({error})=>{ if(error){console.error(error);toast('⚠ No se pudo sincronizar con Supabase','t-wa');} });
+}
+function delC(id){if(!confirm('¿Eliminar este compromiso?'))return;const c=S.comps.find(x=>x.id===id);S.comps=S.comps.filter(x=>x.id!==id);toast('Compromiso eliminado');render();
+  sb.from('compromisos').delete().eq('id',id).then(({error})=>{ if(error){console.error(error);toast('⚠ No se pudo eliminar en Supabase','t-wa');} });
+}
+function openSpR(id){S.pendSpId=id;const c=S.comps.find(x=>x.id===id);document.getElementById('spRqBox').textContent=c?c.spD:'';document.getElementById('fSpR').value='';document.getElementById('ovSp').classList.add('op');}
+function saveSpR(){const v=document.getElementById('fSpR').value.trim();if(!v){toast('Describí el apoyo brindado','t-wa');return;}const c=S.comps.find(x=>x.id===S.pendSpId);if(c)c.spR=v;closeOv('ovSp');toast('Respuesta registrada','t-ok');render();
+  if(c) sb.from('compromisos').update({soporte_respuesta:v,fecha_actualizacion:new Date().toISOString()}).eq('id',c.id)
+    .then(({error})=>{ if(error){console.error(error);toast('⚠ No se pudo sincronizar con Supabase','t-wa');} });
+}
+function toggleAdminOverride(checked){
+  S.cfg.adminOverride=checked;
+  render();
+  sb.from('configuracion').upsert({parametro:'planificacion_admin_override',valor:checked?'TRUE':'FALSE',descripcion:'Habilita planificación fuera del lunes'},{onConflict:'parametro'})
+    .then(({error})=>{ if(error){ console.error(error); toast('⚠ No se pudo sincronizar la configuración','t-wa'); } });
+}
+
+// ── MODAL COMPROMISO ─────────────────────────────────────────
+function openMC(){
+  if(!planEnabled()){toast('La planificación no está habilitada','t-wa');return;}
+  if(isPastWk(S.wo)){toast('No se puede planificar en semanas pasadas','t-wa');return;}
+  S.selTipo=null;
+  ['fNm','fEn','fSpD'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('fPr').value='';
+  document.getElementById('fSp').checked=false;
+  document.getElementById('spDt').style.display='none';
+  document.getElementById('rfSec').style.display='none';
+  document.querySelectorAll('.t-btn').forEach(b=>b.classList.remove('sel'));
+  document.getElementById('fSp').onchange=function(){document.getElementById('spDt').style.display=this.checked?'':'none';};
+  document.getElementById('ovMC').classList.add('op');
+}
+function closeMC(){document.getElementById('ovMC').classList.remove('op');}
+function selT(tipo,btn){
+  S.selTipo=tipo;
+  document.querySelectorAll('.t-btn').forEach(b=>b.classList.remove('sel'));btn.classList.add('sel');
+  const u=S.user==='admin'?null:S.user;
+  const src={doc:FUENTES.doc,nc:FUENTES.nc,poa:FUENTES.poa,otro:null}[tipo];
+  const rfS=document.getElementById('rfSec'),rfL=document.getElementById('rfList');
+  if(src){
+    const f=u?src.filter(x=>x.r===u):src;
+    rfL.innerHTML=f.length?f.map(x=>`<div class="ri" onclick="selR('${x.c}','${x.n.replace(/'/g,"\\'")}',this)">
+      <span>${x.c} — ${x.n}</span>
+      ${x.d?`<span class="dias ${x.d>180?'d-r':x.d>60?'d-a':'d-g'}">${x.d}d</span>`:''}
+    </div>`).join(''):'<div style="padding:8px 10px;font-size:12px;color:var(--mu);font-style:italic">Sin pendientes asignados — escribí el compromiso manualmente</div>';
+    rfS.style.display='';
+  } else { rfS.style.display='none'; }
+}
+function selR(c,n,el){
+  document.querySelectorAll('.ri').forEach(i=>i.classList.remove('sel'));el.classList.add('sel');
+  document.getElementById('fNm').value=`${c} — ${n}`;
+  const sug={doc:'Documento publicado en sistema',nc:'NC/OM cerrada · tratamiento documentado y comunicado',poa:'Entregable completado y enviado'};
+  if(!document.getElementById('fEn').value) document.getElementById('fEn').value=sug[S.selTipo]||'';
+}
+async function saveC(){
+  const nm=document.getElementById('fNm').value.trim();
+  const en=document.getElementById('fEn').value.trim();
+  const pr=document.getElementById('fPr').value;
+  const sp=document.getElementById('fSp').checked;
+  const spD=document.getElementById('fSpD').value.trim();
+  if(!S.selTipo){toast('Seleccioná el tipo de gestión','t-wa');return;}
+  if(!nm){toast('Escribí el compromiso','t-wa');return;}
+  if(!en){toast('Definí el entregable esperado','t-wa');return;}
+  if(!pr){toast('Seleccioná la prioridad','t-wa');return;}
+  if(sp&&!spD){toast('Describí qué apoyo necesitás','t-wa');return;}
+  const u=S.user==='admin'?ADMIN_EMAIL:S.user;
+  const car=S.comps.filter(c=>c.user===u&&c.wo===S.wo).length;
+  if(car>=S.cfg.maxComp&&S.user!=='admin'){toast(`Límite de ${S.cfg.maxComp} compromisos por semana alcanzado`,'t-wa');return;}
+  closeMC();
+  try{
+    const {data,error}=await sb.from('compromisos').insert({
+      email:u, semana_offset:S.wo, semana_label:wkLbl(S.wo), mes:wkMes(S.wo),
+      tipo:S.selTipo, tipo_label:TIPOS[S.selTipo].l, nombre_compromiso:nm, entregable:en,
+      prioridad:pr, estado:'pending', soporte_solicitado:sp, soporte_descripcion:spD||null,
+    }).select().single();
+    if(error) throw error;
+    const c={id:data.id,user:u,wo:S.wo,tipo:S.selTipo,nm,en,pr,st:'pending',sp,spD,spR:'',cau:'',streak:0};
+    S.comps.push(c);
+    toast('✓ Compromiso agregado','t-ok');render();
+  }catch(err){
+    console.error('Error guardando compromiso en Supabase', err);
+    toast('⚠ No se pudo guardar el compromiso en Supabase','t-da');
+  }
+}
+
+// ── MODAL NO PREVISTA ─────────────────────────────────────────
+function openMNP(){['npNm','npEn','npCx'].forEach(id=>document.getElementById(id).value='');document.getElementById('ovNP').classList.add('op');}
+async function saveNP(){
+  const nm=document.getElementById('npNm').value.trim();
+  const en=document.getElementById('npEn').value.trim();
+  if(!nm){toast('Describí la gestión','t-wa');return;}
+  if(!en){toast('Registrá el entregable concreto','t-wa');return;}
+  const u=S.user==='admin'?ADMIN_EMAIL:S.user;
+  const cx=document.getElementById('npCx').value.trim();
+  closeOv('ovNP');
+  try{
+    const {data,error}=await sb.from('no_previstas').insert({
+      email:u, semana_offset:S.wo, semana_label:wkLbl(S.wo), mes:wkMes(S.wo),
+      nombre_gestion:nm, entregable:en, contexto:cx||null,
+    }).select().single();
+    if(error) throw error;
+    const n={id:data.id,user:u,wo:S.wo,nm,en,cx};
+    S.nps.push(n);
+    toast('✓ Gestión no prevista registrada','t-ok');render();
+  }catch(err){
+    console.error('Error guardando gestión no prevista en Supabase', err);
+    toast('⚠ No se pudo guardar en Supabase','t-da');
+  }
+}
+
+// ── EXPORTAR CSV ─────────────────────────────────────────────
+function expCSV(){
+  const u=S.user==='admin'?null:S.user;
+  const rows=[['Semana','Mes','Responsable','Email','Tipo','Compromiso','Entregable','Prioridad','Estado','Causa','Semanas_arrastre']];
+  S.comps.filter(c=>u===null||c.user===u).forEach(c=>{
+    rows.push([wkLbl(c.wo),wkMes(c.wo),uName(c.user),c.user,TIPOS[c.tipo].l,c.nm,c.en,c.pr||'',c.st==='ok'?'Cumplido':c.st==='no'?'No concretado':'Pendiente',c.cau||'',c.streak||0]);
+  });
+  const csv=rows.map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
+  const a=document.createElement('a');
+  a.href='data:text/csv;charset=utf-8,\uFEFF'+encodeURIComponent(csv);
+  a.download=`compromisos_sgc_${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();toast('✓ CSV exportado','t-ok');
+}
+
+// ── TOAST ─────────────────────────────────────────────────────
+function toast(msg,cls=''){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.className='toast show'+(cls?' '+cls:'');
+  clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),2800);
+}
+
+document.getElementById('loginPin').addEventListener('keydown', e=>{ if(e.key==='Enter') loginSubmit(); });
+</script>
+</body>
+</html>
