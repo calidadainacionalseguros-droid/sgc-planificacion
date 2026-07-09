@@ -42,7 +42,7 @@ body{font-family:'Segoe UI',-apple-system,sans-serif;background:var(--li);color:
 .fc-r{display:flex;align-items:center;gap:6px;padding:5px 0;border-bottom:.5px solid var(--bo);font-size:12px}
 .fc-r:last-child{border-bottom:none}
 .fc-c{font-size:10.5px;font-weight:700;color:var(--mu);white-space:nowrap;min-width:60px}
-.fc-nm{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.fc-nm{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .dias{padding:1px 6px;border-radius:8px;font-size:10.5px;font-weight:600;white-space:nowrap}
 .d-r{background:var(--bd);color:#7f1d1d}.d-a{background:var(--bw);color:#78350f}.d-g{background:var(--bs);color:#065f46}
 .cl{display:flex;flex-direction:column;gap:8px}
@@ -223,6 +223,7 @@ input:checked+.tgl-s:before{transform:translateX(20px)}
   <div style="display:flex;justify-content:flex-end;margin-bottom:.75rem">
     <button class="b-ex" onclick="expCSV()">⬇ Exportar CSV</button>
   </div>
+  <div id="miIndicador" style="display:none;margin-bottom:1rem"></div>
   <div class="metrics" id="mRow"></div>
   <div class="sl">Cumplimiento semanal</div>
   <div class="card" id="iSem"></div>
@@ -800,6 +801,21 @@ function renderInd(){
   const cS=(u,wo)=>{const it=S.comps.filter(c=>c.user===u&&c.wo===wo);const ok=it.filter(c=>c.st==='ok').length;return{tot:it.length,ok,pct:it.length?Math.round(ok/it.length*100):null};};
   const cM=u=>{let t=0,ok=0;for(let w=-4;w<=0;w++){const {fri}=getWk(w);const {fri:f0}=getWk(S.wo);if(fri.getMonth()===f0.getMonth()){const s=cS(u,w);t+=s.tot;ok+=s.ok;}}return t?Math.round(ok/t*100):null;};
   const col=p=>p===null?'#ccc':p>=80?'var(--ok)':p>=50?'var(--wa)':'var(--da)';
+  const miEl=document.getElementById('miIndicador');
+  if(S.user!=='admin'){
+    const meS=cS(S.user,S.wo);
+    const meM=cM(S.user);
+    const car=S.comps.filter(c=>c.user===S.user&&c.wo===S.wo).length;
+    miEl.style.display='';
+    miEl.innerHTML=`<div class="card" style="border-left:4px solid ${col(meS.pct)}">
+      <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--mu);margin-bottom:8px">Tu cumplimiento — ${uName(S.user)}</div>
+      <div style="display:flex;gap:1.75rem;flex-wrap:wrap;align-items:baseline">
+        <div><span style="font-size:28px;font-weight:700;color:${col(meS.pct)}">${meS.pct!==null?meS.pct+'%':'—'}</span><span style="font-size:11px;color:var(--mu);margin-left:5px">esta semana (${meS.ok}/${meS.tot})</span></div>
+        <div><span style="font-size:18px;font-weight:700;color:${col(meM)}">${meM!==null?meM+'%':'—'}</span><span style="font-size:11px;color:var(--mu);margin-left:5px">promedio del mes</span></div>
+        <div><span style="font-size:18px;font-weight:700">${car}/${S.cfg.maxComp}</span><span style="font-size:11px;color:var(--mu);margin-left:5px">carga declarada</span></div>
+      </div>
+    </div>`;
+  } else { miEl.style.display='none'; }
   const all=S.comps.filter(c=>c.wo===S.wo);
   const okT=all.filter(c=>c.st==='ok').length;
   const noT=all.filter(c=>c.st==='no').length;
