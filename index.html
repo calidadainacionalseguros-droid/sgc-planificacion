@@ -425,6 +425,7 @@ input:checked+.tgl-s:before{transform:translateX(20px)}
         <option value="lcaballero@nacionalseguros.com.bo">Labinia</option>
         <option value="ylopez@nacionalseguros.com.bo">Yhomara</option>
         <option value="mbarja@nacionalseguros.com.bo">Mayra</option>
+        <option value="mspiegel@nacionalseguros.com.bo">Lizette (solo lectura)</option>
       </select>
     </div>
     <div class="field">
@@ -447,9 +448,11 @@ const UMAP = {
   'ylopez@nacionalseguros.com.bo':  {n:'Yhomara',  short:'YL'},
   'mbarja@nacionalseguros.com.bo':  {n:'Mayra',    short:'MV'},
   'ygarcia@nacionalseguros.com.bo': {n:'Yessica',  short:'YG'},
+  'mspiegel@nacionalseguros.com.bo':{n:'Lizette',  short:'LS'},
 };
 const USERS_EMAIL = ['mmontero@nacionalseguros.com.bo','lcaballero@nacionalseguros.com.bo','ylopez@nacionalseguros.com.bo','mbarja@nacionalseguros.com.bo'];
 const TIPOS = {doc:{l:'Documento',i:'📄'},nc:{l:'NC/OM',i:'🔴'},poa:{l:'POA',i:'📋'},otro:{l:'Otra gestión',i:'⚡'}};
+function isLeader(){return S.user==='admin'||S.role==='viewer';}
 const PCLS = {Alta:'p-a',Media:'p-m',Baja:'p-b'};
 const ADMIN_EMAIL = 'ygarcia@nacionalseguros.com.bo';
 
@@ -519,7 +522,7 @@ async function loginSubmit(){
     const {data,error}=await sb.from('usuarios').select('*').eq('email',email).eq('pin',pin).eq('activo',true).maybeSingle();
     if(error) throw error;
     if(!data){ errEl.textContent='PIN incorrecto o usuario inactivo.'; errEl.style.display=''; return; }
-    S.user=sel; S.authMode='ok';
+    S.user=sel; S.role=data.rol; S.authMode='ok';
     document.getElementById('ovLogin').classList.remove('op');
     document.getElementById('ovLoad').classList.add('op');
     setLoadMsg('Cargando datos…');
@@ -692,7 +695,7 @@ function render(){
   renderInd();
   renderHist();
   renderAdm();
-  document.getElementById('tAdm').style.display=S.user==='admin'?'':'none';
+  document.getElementById('tAdm').style.display=isLeader()?'':'none';
   document.getElementById('admCtrl').style.display=S.user==='admin'?'':'none';
   document.getElementById('lkBan').style.display=(!planEnabled()&&S.wo===0&&S.user!=='admin')?'':'none';
   document.getElementById('btnUp').style.display=S.user==='admin'?'':'none';
@@ -718,7 +721,7 @@ function renderStatus(){
 }
 
 function renderFuentes(){
-  const u=S.user==='admin'?null:S.user;
+  const u=isLeader()?null:S.user;
   const filt=arr=>u?arr.filter(f=>f.r===u):arr;
   const dC=d=>d===null?'':d>180?'d-r':d>60?'d-a':'d-g';
   const secs=[
@@ -743,7 +746,7 @@ function renderFuentes(){
 function togF(){const w=document.getElementById('fWrap');w.style.display=w.style.display==='none'?'':'none';}
 
 function renderComps(){
-  const u=S.user==='admin'?null:S.user;
+  const u=isLeader()?null:S.user;
   const items=S.comps.filter(c=>c.wo===S.wo&&(u===null||c.user===u));
   const el=document.getElementById('cList');
   if(!items.length){el.innerHTML=`<div class="empty"><div style="font-size:32px;margin-bottom:.5rem">📭</div><p>Sin compromisos para esta semana.</p></div>`;return;}
@@ -810,7 +813,7 @@ function renderInd(){
   const col=p=>p===null?'#ccc':p>=80?'var(--ok)':p>=50?'var(--wa)':'var(--da)';
   const miEl=document.getElementById('miIndicador');
   const teamEl=document.getElementById('teamStats');
-  if(S.user!=='admin'){
+  if(!isLeader()){
     const meS=cS(S.user,S.wo);
     const meM=cM(S.user);
     const car=S.comps.filter(c=>c.user===S.user&&c.wo===S.wo).length;
@@ -861,7 +864,7 @@ function renderInd(){
 }
 
 function renderHist(){
-  const u=S.user==='admin'?null:S.user;
+  const u=isLeader()?null:S.user;
   const items=S.comps.filter(c=>c.wo<=0&&(u===null||c.user===u)).sort((a,b)=>b.wo-a.wo||a.user.localeCompare(b.user));
   const tb=document.getElementById('hBody');
   if(!items.length){tb.innerHTML='<tr><td colspan="10" style="text-align:center;color:var(--mu);padding:16px">Sin historial aún</td></tr>';return;}
@@ -874,7 +877,7 @@ function renderHist(){
 }
 
 function renderAdm(){
-  if(S.user!=='admin') return;
+  if(!isLeader()) return;
   document.getElementById('aView').innerHTML=USERS_EMAIL.map(u=>{
     const it=S.comps.filter(c=>c.user===u&&c.wo===S.wo);
     const ok=it.filter(c=>c.st==='ok').length,no=it.filter(c=>c.st==='no').length,pnd=it.filter(c=>c.st==='pending').length;
@@ -904,7 +907,7 @@ function renderAdm(){
     ?sops.map(c=>`<div style="background:var(--bp);border:1px solid #c4b5fd;border-radius:8px;padding:.75rem 1rem;margin-bottom:8px">
         <strong>${uName(c.user)}</strong> · ${c.nm}<br>
         <span style="color:var(--pu);font-size:12.5px">${c.spD}</span>
-        <br><button class="btn b-sc b-sm" style="margin-top:6px" onclick="openSpR(${c.id})">Registrar respuesta</button>
+        ${S.user==='admin'?`<br><button class="btn b-sc b-sm" style="margin-top:6px" onclick="openSpR(${c.id})">Registrar respuesta</button>`:''}
       </div>`).join('')
     :'<div class="empty" style="padding:1rem"><div style="font-size:20px">✓</div><p style="font-size:12px">Sin soportes pendientes.</p></div>';
   const arr=S.comps.filter(c=>c.streak>=2);
@@ -995,8 +998,6 @@ async function saveC(){
   if(!pr){toast('Seleccioná la prioridad','t-wa');return;}
   if(sp&&!spD){toast('Describí qué apoyo necesitás','t-wa');return;}
   const u=S.user==='admin'?ADMIN_EMAIL:S.user;
-  const car=S.comps.filter(c=>c.user===u&&c.wo===S.wo).length;
-  if(car>=S.cfg.maxComp&&S.user!=='admin'){toast(`Límite de ${S.cfg.maxComp} compromisos por semana alcanzado`,'t-wa');return;}
   closeMC();
   try{
     const {data,error}=await sb.from('compromisos').insert({
@@ -1041,7 +1042,7 @@ async function saveNP(){
 
 // ── EXPORTAR CSV ─────────────────────────────────────────────
 function expCSV(){
-  const u=S.user==='admin'?null:S.user;
+  const u=isLeader()?null:S.user;
   const rows=[['Semana','Mes','Responsable','Email','Tipo','Compromiso','Entregable','Prioridad','Estado','Causa','Semanas_arrastre']];
   S.comps.filter(c=>u===null||c.user===u).forEach(c=>{
     rows.push([wkLbl(c.wo),wkMes(c.wo),uName(c.user),c.user,TIPOS[c.tipo].l,c.nm,c.en,c.pr||'',c.st==='ok'?'Cumplido':c.st==='no'?'No concretado':'Pendiente',c.cau||'',c.streak||0]);
