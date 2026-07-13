@@ -600,7 +600,7 @@ function calcDias(fechaVal){
   return Math.floor((hoy-fecha)/(1000*60*60*24));
 }
 // Asuntos reales vienen como "NC - 23 Gestión de talleres…" u "OM - AE - 41 …" (sin nombre a veces, ej. "OM - 219")
-const NC_CODE_RE = /^((?:NC|OM|Rev)(?:\s*-\s*[A-ZÀ-Ú0-9]+)+)\s*(.*)$/;
+const NC_CODE_RE = /^((?:NC|OM|Rev)(?:\s*-\s*[A-ZÀ-Ú0-9]+(?![a-zà-ú]))+)\s*-?\s*(.*)$/;
 function splitAsunto(asunto){
   const a=(asunto||'').trim();
   const m=a.match(NC_CODE_RE);
