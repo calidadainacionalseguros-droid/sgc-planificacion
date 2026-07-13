@@ -632,7 +632,7 @@ function loadFuentes(input){
       const nuevoDoc = docs
         .filter(r=>!['concluido','concluidos'].includes(String(r.Deposito||'').trim().toLowerCase()))
         .map(r=>({
-          c:(r.Nombre_de_la_tarea||'').substring(0,10),
+          c:'DOC',
           n:r.Nombre_de_la_tarea||'',
           r:r.Responsable_de_Calidad,
           d:calcDias(r.Fecha_de_creacion),
