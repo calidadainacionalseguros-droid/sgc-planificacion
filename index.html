@@ -602,7 +602,7 @@ function splitAsunto(asunto){
   const a=(asunto||'').trim();
   const m=a.match(NC_CODE_RE);
   if(m){ const code=m[1].trim(), name=m[2].trim(); return {c:code,n:name||code}; }
-  return {c:a.slice(0,12),n:a};
+  return {c:'NC/OM',n:a};
 }
 function loadFuentes(input){
   const file = input.files[0];
