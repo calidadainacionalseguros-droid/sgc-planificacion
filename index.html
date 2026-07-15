@@ -251,6 +251,13 @@ input:checked+.tgl-s:before{transform:translateX(20px)}
       <tbody id="hBody"></tbody>
     </table>
   </div>
+  <div class="sl" style="margin-top:1.5rem">Gestiones no previstas — histórico <span style="font-weight:400;color:var(--mu);text-transform:none;font-size:11px">(no suman al % de cumplimiento)</span></div>
+  <div class="hw">
+    <table class="ht">
+      <thead><tr><th>Semana</th><th>Mes</th><th>Responsable</th><th>Gestión</th><th>Entregable</th><th>Contexto</th></tr></thead>
+      <tbody id="hNPBody"></tbody>
+    </table>
+  </div>
 </div>
 
 <!-- VISTA LÍDER -->
@@ -819,6 +826,7 @@ function renderInd(){
     const car=S.comps.filter(c=>c.user===S.user&&c.wo===S.wo).length;
     const meSp=S.comps.filter(c=>c.user===S.user&&c.sp&&!c.spR).length;
     const meAr=S.comps.filter(c=>c.user===S.user&&c.streak>=2).length;
+    const meNp=S.nps.filter(n=>n.user===S.user&&n.wo===S.wo).length;
     miEl.style.display='';
     teamEl.style.display='none';
     miEl.innerHTML=`<div class="card" style="border-left:4px solid ${col(meS.pct)}">
@@ -829,6 +837,7 @@ function renderInd(){
         <div><span style="font-size:18px;font-weight:700">${car}/${S.cfg.maxComp}</span><span style="font-size:11px;color:var(--mu);margin-left:5px">carga declarada</span></div>
         <div><span style="font-size:18px;font-weight:700;color:${meSp?'var(--pu)':'var(--mu)'}">${meSp}</span><span style="font-size:11px;color:var(--mu);margin-left:5px">soportes sin respuesta</span></div>
         <div><span style="font-size:18px;font-weight:700;color:${meAr?'var(--da)':'var(--mu)'}">${meAr}</span><span style="font-size:11px;color:var(--mu);margin-left:5px">con arrastre</span></div>
+        <div><span style="font-size:18px;font-weight:700;color:var(--pu)">⚡${meNp}</span><span style="font-size:11px;color:var(--mu);margin-left:5px">no previstas concluidas (no suma al %)</span></div>
       </div>
     </div>`;
   } else { miEl.style.display='none'; teamEl.style.display=''; }
@@ -842,14 +851,15 @@ function renderInd(){
     <div class="mc ok"><div class="mv">${all.length?Math.round(okT/all.length*100):0}%</div><div class="ml">Cumplimiento equipo</div><div class="ms">Meta ≥ ${S.cfg.metaSem}%</div></div>
     <div class="mc wa"><div class="mv">${spT}</div><div class="ml">Soportes pendientes</div><div class="ms">Sin respuesta</div></div>
     <div class="mc da"><div class="mv">${arT}</div><div class="ml">Con arrastre</div><div class="ms">+2 sem. sin concretar</div></div>`;
-  const bRow=(u,sem,car)=>`<div class="pb-r">
+  const bRow=(u,sem,car,np)=>`<div class="pb-r">
     <span class="pb-n">${uName(u)}</span>
     <span class="pb-ld" style="color:${car>S.cfg.maxComp?'var(--da)':car>=3?'var(--ok)':'var(--wa)'}">${car}/${S.cfg.maxComp}</span>
     <div class="pb-tr"><div class="pb-f" style="width:${sem||0}%;background:${col(sem)}"></div></div>
     <span class="pb-p" style="color:${col(sem)}">${sem!==null?sem+'%':'—'}</span>
     <span class="pb-c">${S.comps.filter(c=>c.user===u&&c.wo===S.wo&&c.st==='ok').length}/${S.comps.filter(c=>c.user===u&&c.wo===S.wo).length}</span>
+    <span class="pb-c" style="color:var(--pu);min-width:34px" title="Gestiones no previstas concluidas esta semana (no suma al %)">⚡${np}</span>
   </div>`;
-  document.getElementById('iSem').innerHTML=USERS_EMAIL.map(u=>{const s=cS(u,S.wo);const car=S.comps.filter(c=>c.user===u&&c.wo===S.wo).length;return bRow(u,s.pct,car);}).join('');
+  document.getElementById('iSem').innerHTML=USERS_EMAIL.map(u=>{const s=cS(u,S.wo);const car=S.comps.filter(c=>c.user===u&&c.wo===S.wo).length;const np=S.nps.filter(n=>n.user===u&&n.wo===S.wo).length;return bRow(u,s.pct,car,np);}).join('');
   document.getElementById('iMes').innerHTML=USERS_EMAIL.map(u=>{const m=cM(u);return`<div class="pb-r">
     <span class="pb-n">${uName(u)}</span><span class="pb-ld" style="color:var(--mu)">mes</span>
     <div class="pb-tr"><div class="pb-f" style="width:${m||0}%;background:${col(m)}"></div></div>
@@ -867,13 +877,20 @@ function renderHist(){
   const u=isLeader()?null:S.user;
   const items=S.comps.filter(c=>c.wo<=0&&(u===null||c.user===u)).sort((a,b)=>b.wo-a.wo||a.user.localeCompare(b.user));
   const tb=document.getElementById('hBody');
-  if(!items.length){tb.innerHTML='<tr><td colspan="10" style="text-align:center;color:var(--mu);padding:16px">Sin historial aún</td></tr>';return;}
-  tb.innerHTML=items.map(c=>{
+  if(!items.length){tb.innerHTML='<tr><td colspan="10" style="text-align:center;color:var(--mu);padding:16px">Sin historial aún</td></tr>';}
+  else{tb.innerHTML=items.map(c=>{
     const wl=c.wo===0?'Semana actual':`S${Math.abs(c.wo)} anterior`;
     const sb=c.st==='ok'?'<span class="bdg b-gok">Cumplido</span>':c.st==='no'?'<span class="bdg b-gno">No concretado</span>':'<span class="bdg b-gp">Pendiente</span>';
     const str=c.streak>=2?`<span style="color:var(--da);font-weight:600">⚠ ${c.streak} sem.</span>`:'—';
     return`<tr><td>${wl}</td><td style="font-size:11.5px;color:var(--mu)">${wkMes(c.wo)}</td><td><strong>${uName(c.user)}</strong></td><td>${TIPOS[c.tipo].i} ${TIPOS[c.tipo].l}</td><td>${c.nm}</td><td style="font-size:12px">${c.en}</td><td><span class="pr ${PCLS[c.pr]||'p-m'}">${c.pr||'—'}</span></td><td>${sb}</td><td style="font-size:12px;color:var(--mu)">${c.cau||'—'}</td><td>${str}</td></tr>`;
-  }).join('');
+  }).join('');}
+  const npItems=S.nps.filter(n=>n.wo<=0&&(u===null||n.user===u)).sort((a,b)=>b.wo-a.wo||a.user.localeCompare(b.user));
+  const npTb=document.getElementById('hNPBody');
+  if(!npItems.length){npTb.innerHTML='<tr><td colspan="6" style="text-align:center;color:var(--mu);padding:16px">Sin gestiones no previstas registradas</td></tr>';}
+  else{npTb.innerHTML=npItems.map(n=>{
+    const wl=n.wo===0?'Semana actual':`S${Math.abs(n.wo)} anterior`;
+    return`<tr><td>${wl}</td><td style="font-size:11.5px;color:var(--mu)">${wkMes(n.wo)}</td><td><strong>${uName(n.user)}</strong></td><td>${n.nm}</td><td style="font-size:12px">${n.en}</td><td style="font-size:12px;color:var(--mu);font-style:italic">${n.cx||'—'}</td></tr>`;
+  }).join('');}
 }
 
 function renderAdm(){
