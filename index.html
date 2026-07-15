@@ -817,6 +817,7 @@ function renderNPs(){
 function renderInd(){
   const cS=(u,wo)=>{const it=S.comps.filter(c=>c.user===u&&c.wo===wo);const ok=it.filter(c=>c.st==='ok').length;return{tot:it.length,ok,pct:it.length?Math.round(ok/it.length*100):null};};
   const cM=u=>{let t=0,ok=0;for(let w=-4;w<=0;w++){const {fri}=getWk(w);const {fri:f0}=getWk(S.wo);if(fri.getMonth()===f0.getMonth()){const s=cS(u,w);t+=s.tot;ok+=s.ok;}}return t?Math.round(ok/t*100):null;};
+  const mCar=u=>{let car=0,weeks=0;for(let w=-4;w<=0;w++){const {fri}=getWk(w);const {fri:f0}=getWk(S.wo);if(fri.getMonth()===f0.getMonth()){weeks++;car+=S.comps.filter(c=>c.user===u&&c.wo===w).length;}}return{car,max:weeks*S.cfg.maxComp};};
   const col=p=>p===null?'#ccc':p>=80?'var(--ok)':p>=50?'var(--wa)':'var(--da)';
   const miEl=document.getElementById('miIndicador');
   const teamEl=document.getElementById('teamStats');
@@ -860,8 +861,8 @@ function renderInd(){
     <span class="pb-c" style="color:var(--pu);min-width:34px" title="Gestiones no previstas concluidas esta semana (no suma al %)">⚡${np}</span>
   </div>`;
   document.getElementById('iSem').innerHTML=USERS_EMAIL.map(u=>{const s=cS(u,S.wo);const car=S.comps.filter(c=>c.user===u&&c.wo===S.wo).length;const np=S.nps.filter(n=>n.user===u&&n.wo===S.wo).length;return bRow(u,s.pct,car,np);}).join('');
-  document.getElementById('iMes').innerHTML=USERS_EMAIL.map(u=>{const m=cM(u);return`<div class="pb-r">
-    <span class="pb-n">${uName(u)}</span><span class="pb-ld" style="color:var(--mu)">mes</span>
+  document.getElementById('iMes').innerHTML=USERS_EMAIL.map(u=>{const m=cM(u);const mc=mCar(u);return`<div class="pb-r">
+    <span class="pb-n">${uName(u)}</span><span class="pb-ld" style="color:${mc.car>mc.max?'var(--da)':'var(--mu)'}">${mc.car}/${mc.max}</span>
     <div class="pb-tr"><div class="pb-f" style="width:${m||0}%;background:${col(m)}"></div></div>
     <span class="pb-p" style="color:${col(m)}">${m!==null?m+'%':'—'}</span>
     <span class="pb-c">prom. sem.</span></div>`;}).join('');
@@ -898,12 +899,14 @@ function renderAdm(){
   document.getElementById('aView').innerHTML=USERS_EMAIL.map(u=>{
     const it=S.comps.filter(c=>c.user===u&&c.wo===S.wo);
     const ok=it.filter(c=>c.st==='ok').length,no=it.filter(c=>c.st==='no').length,pnd=it.filter(c=>c.st==='pending').length;
+    const np=S.nps.filter(n=>n.user===u&&n.wo===S.wo).length;
     return`<div class="ap"><div class="ap-h" onclick="togAP('${u}')">
       <span class="ap-n">${uName(u)}</span>
-      <div style="display:flex;gap:6px">
+      <div style="display:flex;gap:6px;align-items:center">
         <span class="bdg b-gok">${ok} cumpl.</span>
         <span class="bdg b-gno">${no} no conc.</span>
         <span class="bdg b-gp">${pnd} pend.</span>
+        <span class="bdg b-gpu" title="Gestiones no previstas concluidas (no suma al %)">⚡${np}</span>
         <span style="font-size:12px;font-weight:600;color:${it.length?'var(--ok)':'var(--mu)'}">${it.length?Math.round(ok/it.length*100)+'%':'—'}</span>
       </div>
     </div>
