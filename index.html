@@ -235,6 +235,8 @@ input:checked+.tgl-s:before{transform:translateX(20px)}
     <div class="card" id="iSem"></div>
     <div class="sl">Cumplimiento acumulado — mes actual</div>
     <div class="card" id="iMes"></div>
+    <div class="sl">No previstas — acumulado del mes <span style="font-weight:400;color:var(--mu);text-transform:none;font-size:11px">(no afecta al %)</span></div>
+    <div class="card" id="iNPMes"></div>
     <div class="sl" id="slCar">Carga semanal (compromisos declarados / máximo 5)</div>
     <div class="card" id="iCar"></div>
   </div>
@@ -817,7 +819,8 @@ function renderNPs(){
 function renderInd(){
   const cS=(u,wo)=>{const it=S.comps.filter(c=>c.user===u&&c.wo===wo);const ok=it.filter(c=>c.st==='ok').length;return{tot:it.length,ok,pct:it.length?Math.round(ok/it.length*100):null};};
   const cM=u=>{let t=0,ok=0;for(let w=-4;w<=0;w++){const {fri}=getWk(w);const {fri:f0}=getWk(S.wo);if(fri.getMonth()===f0.getMonth()){const s=cS(u,w);t+=s.tot;ok+=s.ok;}}return t?Math.round(ok/t*100):null;};
-  const mCar=u=>{let car=0,weeks=0;for(let w=-4;w<=0;w++){const {fri}=getWk(w);const {fri:f0}=getWk(S.wo);if(fri.getMonth()===f0.getMonth()){weeks++;car+=S.comps.filter(c=>c.user===u&&c.wo===w).length;}}return{car,max:weeks*S.cfg.maxComp};};
+  const cMTot=u=>{let t=0,ok=0;for(let w=-4;w<=0;w++){const {fri}=getWk(w);const {fri:f0}=getWk(S.wo);if(fri.getMonth()===f0.getMonth()){const s=cS(u,w);t+=s.tot;ok+=s.ok;}}return{ok,tot:t};};
+  const npMes=u=>{let c=0;for(let w=-4;w<=0;w++){const {fri}=getWk(w);const {fri:f0}=getWk(S.wo);if(fri.getMonth()===f0.getMonth())c+=S.nps.filter(n=>n.user===u&&n.wo===w).length;}return c;};
   const col=p=>p===null?'#ccc':p>=80?'var(--ok)':p>=50?'var(--wa)':'var(--da)';
   const miEl=document.getElementById('miIndicador');
   const teamEl=document.getElementById('teamStats');
@@ -861,11 +864,18 @@ function renderInd(){
     <span class="pb-c" style="color:var(--pu);min-width:34px" title="Gestiones no previstas concluidas esta semana (no suma al %)">⚡${np}</span>
   </div>`;
   document.getElementById('iSem').innerHTML=USERS_EMAIL.map(u=>{const s=cS(u,S.wo);const car=S.comps.filter(c=>c.user===u&&c.wo===S.wo).length;const np=S.nps.filter(n=>n.user===u&&n.wo===S.wo).length;return bRow(u,s.pct,car,np);}).join('');
-  document.getElementById('iMes').innerHTML=USERS_EMAIL.map(u=>{const m=cM(u);const mc=mCar(u);return`<div class="pb-r">
-    <span class="pb-n">${uName(u)}</span><span class="pb-ld" style="color:${mc.car>mc.max?'var(--da)':'var(--mu)'}">${mc.car}/${mc.max}</span>
+  document.getElementById('iMes').innerHTML=USERS_EMAIL.map(u=>{const m=cM(u);const mt=cMTot(u);return`<div class="pb-r">
+    <span class="pb-n">${uName(u)}</span><span class="pb-ld" style="color:var(--mu)">${mt.ok}/${mt.tot}</span>
     <div class="pb-tr"><div class="pb-f" style="width:${m||0}%;background:${col(m)}"></div></div>
     <span class="pb-p" style="color:${col(m)}">${m!==null?m+'%':'—'}</span>
-    <span class="pb-c">prom. sem.</span></div>`;}).join('');
+    <span class="pb-c">cerrado/mes</span></div>`;}).join('');
+  const npVals=USERS_EMAIL.map(u=>npMes(u));
+  const npMax=Math.max(1,...npVals);
+  document.getElementById('iNPMes').innerHTML=USERS_EMAIL.map(u=>{const c=npMes(u);return`<div class="pb-r">
+    <span class="pb-n">${uName(u)}</span><span class="pb-ld" style="color:var(--pu)">⚡${c}</span>
+    <div class="pb-tr"><div class="pb-f" style="width:${Math.round(c/npMax*100)}%;background:var(--pu)"></div></div>
+    <span class="pb-p" style="color:var(--pu)">${c}</span>
+    <span class="pb-c">no previstas</span></div>`;}).join('');
   const slCarEl=document.getElementById('slCar');if(slCarEl)slCarEl.textContent=`Carga semanal (compromisos declarados / máximo ${S.cfg.maxComp})`;
   document.getElementById('iCar').innerHTML=USERS_EMAIL.map(u=>{const car=S.comps.filter(c=>c.user===u&&c.wo===S.wo).length;const p=Math.round(car/S.cfg.maxComp*100);const c2=car>S.cfg.maxComp?'var(--da)':car>=3?'var(--ok)':'var(--wa)';return`<div class="pb-r">
     <span class="pb-n">${uName(u)}</span><span class="pb-ld" style="color:${c2}">${car}/${S.cfg.maxComp}</span>
