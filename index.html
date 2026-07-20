@@ -489,6 +489,18 @@ let S = {
 };
 
 // ── WEEK / DATE ───────────────────────────────────────────────
+// Semana absoluta: identifica una semana calendario de forma permanente (independiente de "hoy"),
+// anclada al lunes 5-ene-2026. Se usa SOLO al leer/escribir en Supabase; el resto de la app sigue
+// trabajando con offsets relativos a "hoy" (S.wo), como siempre.
+const WK_ANCHOR = new Date(2026,0,5);
+function absWeek(date){
+  const d=new Date(date); const day=d.getDay();
+  const diff=d.getDate()-day+(day===0?-6:1);
+  const mon=new Date(d); mon.setDate(diff); mon.setHours(0,0,0,0);
+  const a=new Date(WK_ANCHOR); a.setHours(0,0,0,0);
+  return Math.round((mon-a)/(7*24*60*60*1000));
+}
+function curAbsWeek(){return absWeek(new Date());}
 function getWk(off=0){
   const now=new Date();
   const day=now.getDay();
@@ -556,12 +568,12 @@ function applyCfg(p,v){
 
 // ── Mapeo filas de Supabase ↔ objetos internos ──────────────────
 function rowToComp(row){
-  return {id:row.id,user:row.email,wo:row.semana_offset,tipo:row.tipo,nm:row.nombre_compromiso,en:row.entregable,
+  return {id:row.id,user:row.email,wo:row.semana_offset-curAbsWeek(),tipo:row.tipo,nm:row.nombre_compromiso,en:row.entregable,
     pr:row.prioridad,st:row.estado,sp:!!row.soporte_solicitado,spD:row.soporte_descripcion||'',spR:row.soporte_respuesta||'',
     cau:row.causa_noconcretado||'',streak:row.semanas_arrastre||0};
 }
 function rowToNp(row){
-  return {id:row.id,user:row.email,wo:row.semana_offset,nm:row.nombre_gestion,en:row.entregable,cx:row.contexto||''};
+  return {id:row.id,user:row.email,wo:row.semana_offset-curAbsWeek(),nm:row.nombre_gestion,en:row.entregable,cx:row.contexto||''};
 }
 function fuenteToItem(f){return {c:f.codigo,n:f.nombre,r:f.responsable_email,d:f.dias_pendiente};}
 
@@ -1031,7 +1043,7 @@ async function saveC(){
   closeMC();
   try{
     const {data,error}=await sb.from('compromisos').insert({
-      email:u, semana_offset:S.wo, semana_label:wkLbl(S.wo), mes:wkMes(S.wo),
+      email:u, semana_offset:curAbsWeek()+S.wo, semana_label:wkLbl(S.wo), mes:wkMes(S.wo),
       tipo:S.selTipo, tipo_label:TIPOS[S.selTipo].l, nombre_compromiso:nm, entregable:en,
       prioridad:pr, estado:'pending', soporte_solicitado:sp, soporte_descripcion:spD||null,
     }).select().single();
@@ -1057,7 +1069,7 @@ async function saveNP(){
   closeOv('ovNP');
   try{
     const {data,error}=await sb.from('no_previstas').insert({
-      email:u, semana_offset:S.wo, semana_label:wkLbl(S.wo), mes:wkMes(S.wo),
+      email:u, semana_offset:curAbsWeek()+S.wo, semana_label:wkLbl(S.wo), mes:wkMes(S.wo),
       nombre_gestion:nm, entregable:en, contexto:cx||null,
     }).select().single();
     if(error) throw error;
