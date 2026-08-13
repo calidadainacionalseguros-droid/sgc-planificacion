@@ -87,6 +87,9 @@ body{font-family:'Segoe UI',-apple-system,sans-serif;background:var(--li);color:
 .f-l{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--mu);margin-bottom:4px;display:block}
 .f-n{font-size:10.5px;color:var(--mu);margin-top:3px;font-style:italic}
 input[type=text],textarea,.f-s{width:100%;border:1px solid var(--bo);border-radius:6px;padding:7px 10px;font-size:12.5px;font-family:inherit;color:var(--tx);background:var(--ca)}
+.chip-f{border:1px solid var(--bo);background:var(--ca);border-radius:20px;padding:4px 11px;font-size:11.5px;font-weight:600;cursor:pointer;color:var(--mu);font-family:inherit}
+.chip-f:hover{border-color:var(--se)}
+.chip-f.on{background:var(--se);border-color:var(--se);color:#fff}
 input[type=text]:focus,textarea:focus,.f-s:focus{outline:none;border-color:var(--se);box-shadow:0 0 0 2px var(--bb)}
 textarea{resize:none;min-height:60px}
 .tg{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:.75rem}
@@ -254,7 +257,12 @@ input:checked+.tgl-s:before{transform:translateX(20px)}
 
 <!-- HISTORIAL -->
 <div id="tab-hist" class="tp">
-  <div style="display:flex;justify-content:flex-end;margin-bottom:.75rem">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.75rem;flex-wrap:wrap;gap:8px">
+    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+      <select id="hMesFilt" class="f-s" style="width:auto;padding:5px 10px;font-size:12.5px" onchange="renderHist()"><option value="all">Todos los meses</option></select>
+      <div id="hRespChips" style="display:flex;gap:6px;flex-wrap:wrap"></div>
+      <div id="hEstChips" style="display:flex;gap:6px;flex-wrap:wrap"></div>
+    </div>
     <button class="b-ex" onclick="expCSV()">⬇ Exportar CSV</button>
   </div>
   <div class="hw">
@@ -499,7 +507,7 @@ let S = {
   selTipo:null, pendCauId:null, pendSpId:null,
   comps:[], nps:[], nid:1,
   cfg:{maxComp:5, diaPlan:'Lunes', adminOverride:false, metaSem:80, metaMes:75},
-  online:true, authMode:null, adminOwn:false,
+  online:true, authMode:null, adminOwn:false, hFilt:{mes:'all',resp:'all',est:'all'},
 };
 
 // ── WEEK / DATE ───────────────────────────────────────────────
@@ -794,7 +802,7 @@ function renderComps(){
     const sC=c.st==='ok'?'sd-ok':c.st==='no'?'sd-no':'sd-p';
     const sT={ok:'Cumplido',no:'No concretado',pending:'Pendiente'}[c.st]||'Pendiente';
     const sCol=c.st==='ok'?'var(--ok)':c.st==='no'?'var(--da)':'var(--mu)';
-    const canAct=!isPastWk(c.wo)&&(S.user==='admin'||S.user===c.user);
+    const canAct=(S.user==='admin')||(!isPastWk(c.wo)&&S.user===c.user);
     const canDel=S.user==='admin'&&!isPastWk(c.wo);
     return `<div class="cc" id="cc${c.id}">
       <div class="cc-h" onclick="togCC(${c.id})">
@@ -917,23 +925,55 @@ function renderInd(){
 
 function renderHist(){
   const u=isLeader()?null:S.user;
-  const items=S.comps.filter(c=>c.wo<=0&&(u===null||c.user===u)).sort((a,b)=>b.wo-a.wo||a.user.localeCompare(b.user));
+  const baseItems=S.comps.filter(c=>c.wo<=0&&(u===null||c.user===u)).sort((a,b)=>b.wo-a.wo||a.user.localeCompare(b.user));
+
+  // Poblar dropdown de meses (una sola vez por conjunto de datos distinto)
+  const mesSel=document.getElementById('hMesFilt');
+  const meses=[...new Set(baseItems.map(c=>wkMes(c.wo)))];
+  const curMesOpts=[...mesSel.options].slice(1).map(o=>o.value).join('|');
+  if(curMesOpts!==meses.join('|')){
+    const keep=mesSel.value;
+    mesSel.innerHTML='<option value="all">Todos los meses</option>'+meses.map(m=>`<option value="${m}">${m}</option>`).join('');
+    if(meses.includes(keep)) mesSel.value=keep;
+  }
+  if(!S.hFilt) S.hFilt={mes:'all',resp:'all',est:'all'};
+  S.hFilt.mes=mesSel.value;
+
+  // Chips de responsable (solo si hay vista de equipo)
+  const respChipsEl=document.getElementById('hRespChips');
+  if(u===null){
+    const resps=[...new Set(baseItems.map(c=>c.user))].sort((a,b)=>uName(a).localeCompare(uName(b)));
+    respChipsEl.innerHTML=['all',...resps].map(r=>`<button class="chip-f ${S.hFilt.resp===r?'on':''}" onclick="setHFilt('resp','${r}')">${r==='all'?'Todos':uName(r)}</button>`).join('');
+  } else { respChipsEl.innerHTML=''; S.hFilt.resp='all'; }
+
+  // Chips de estado
+  const estChipsEl=document.getElementById('hEstChips');
+  const estOpts=[['all','Todos'],['ok','✓ Cumplido'],['no','○ No concretado'],['pending','⏳ Pendiente']];
+  estChipsEl.innerHTML=estOpts.map(([v,l])=>`<button class="chip-f ${S.hFilt.est===v?'on':''}" onclick="setHFilt('est','${v}')">${l}</button>`).join('');
+
+  const items=baseItems.filter(c=>
+    (S.hFilt.mes==='all'||wkMes(c.wo)===S.hFilt.mes) &&
+    (S.hFilt.resp==='all'||c.user===S.hFilt.resp) &&
+    (S.hFilt.est==='all'||c.st===S.hFilt.est)
+  );
+
   const tb=document.getElementById('hBody');
-  if(!items.length){tb.innerHTML='<tr><td colspan="10" style="text-align:center;color:var(--mu);padding:16px">Sin historial aún</td></tr>';}
+  if(!items.length){tb.innerHTML='<tr><td colspan="10" style="text-align:center;color:var(--mu);padding:16px">Sin registros para este filtro</td></tr>';}
   else{tb.innerHTML=items.map(c=>{
     const wl=c.wo===0?'Semana actual':`S${Math.abs(c.wo)} anterior`;
     const sb=c.st==='ok'?'<span class="bdg b-gok">Cumplido</span>':c.st==='no'?'<span class="bdg b-gno">No concretado</span>':'<span class="bdg b-gp">Pendiente</span>';
     const str=c.streak>=2?`<span style="color:var(--da);font-weight:600">⚠ ${c.streak} sem.</span>`:'—';
     return`<tr><td>${wl}</td><td style="font-size:11.5px;color:var(--mu)">${wkMes(c.wo)}</td><td><strong>${uName(c.user)}</strong></td><td>${TIPOS[c.tipo].i} ${TIPOS[c.tipo].l}</td><td>${c.nm}</td><td style="font-size:12px">${c.en}</td><td><span class="pr ${PCLS[c.pr]||'p-m'}">${c.pr||'—'}</span></td><td>${sb}</td><td style="font-size:12px;color:var(--mu)">${c.cau||'—'}</td><td>${str}</td></tr>`;
   }).join('');}
-  const npItems=S.nps.filter(n=>n.wo<=0&&(u===null||n.user===u)).sort((a,b)=>b.wo-a.wo||a.user.localeCompare(b.user));
+  const npItems=S.nps.filter(n=>n.wo<=0&&(u===null||n.user===u)&&(S.hFilt.mes==='all'||wkMes(n.wo)===S.hFilt.mes)&&(S.hFilt.resp==='all'||n.user===S.hFilt.resp)).sort((a,b)=>b.wo-a.wo||a.user.localeCompare(b.user));
   const npTb=document.getElementById('hNPBody');
-  if(!npItems.length){npTb.innerHTML='<tr><td colspan="6" style="text-align:center;color:var(--mu);padding:16px">Sin gestiones no previstas registradas</td></tr>';}
+  if(!npItems.length){npTb.innerHTML='<tr><td colspan="6" style="text-align:center;color:var(--mu);padding:16px">Sin gestiones no previstas para este filtro</td></tr>';}
   else{npTb.innerHTML=npItems.map(n=>{
     const wl=n.wo===0?'Semana actual':`S${Math.abs(n.wo)} anterior`;
     return`<tr><td>${wl}</td><td style="font-size:11.5px;color:var(--mu)">${wkMes(n.wo)}</td><td><strong>${uName(n.user)}</strong></td><td>${n.nm}</td><td style="font-size:12px">${n.en}</td><td style="font-size:12px;color:var(--mu);font-style:italic">${n.cx||'—'}</td></tr>`;
   }).join('');}
 }
+function setHFilt(k,v){S.hFilt[k]=v;renderHist();}
 
 function renderAdm(){
   if(!isLeader()) return;
