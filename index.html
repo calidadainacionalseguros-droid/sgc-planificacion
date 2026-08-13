@@ -263,7 +263,10 @@ input:checked+.tgl-s:before{transform:translateX(20px)}
       <div id="hRespChips" style="display:flex;gap:6px;flex-wrap:wrap"></div>
       <div id="hEstChips" style="display:flex;gap:6px;flex-wrap:wrap"></div>
     </div>
-    <button class="b-ex" onclick="expCSV()">⬇ Exportar CSV</button>
+    <div>
+      <button class="b-ex" onclick="expCSV()">⬇ Exportar CSV</button>
+      <button class="b-ex" style="margin-left:6px" onclick="expCSVNP()">⬇ Exportar no previstas</button>
+    </div>
   </div>
   <div class="hw">
     <table class="ht">
@@ -305,7 +308,7 @@ input:checked+.tgl-s:before{transform:translateX(20px)}
   </div>
   <div class="gs">
     <h3>Arrastre automático (⚠ X sem. sin concretar)</h3>
-    <p style="font-size:12.5px;line-height:1.6">Al registrar un compromiso de tipo <strong>NC/OM</strong> o <strong>Documento</strong>, la app busca si ese mismo código (ej. "NC - 23", "PR-632") quedó como no concretado la semana anterior — si lo encuentra, hereda el contador de arrastre automáticamente, sin que tengas que hacer nada. Para <strong>POA</strong> y <strong>Otra gestión</strong> el arrastre sigue siendo manual, porque el tema no tiene un código único y enlazar por texto generaría falsos positivos entre personas distintas.</p>
+    <p style="font-size:12.5px;line-height:1.6">La app recalcula el arrastre en vivo, mirando todo el historial de la persona: cuenta cuántas veces consecutivas el mismo tema quedó "no concretado", sin importar si hubo semanas de por medio sin registrar nada (ej. vacaciones). Identifica el "mismo tema" por su <strong>código</strong> cuando existe (NC/OM, Documentos con número real como "PR-632"); si el código todavía no tiene número (ej. "PR-XXX") o es POA/Otra gestión, usa el <strong>texto completo del compromiso</strong> como respaldo — por eso conviene mantener la redacción igual entre semanas cuando sea el mismo tema.</p>
   </div>
   <div class="gs">
     <h3>Entregables válidos por tipo</h3>
@@ -623,6 +626,7 @@ async function loadBBDD(){
     };
     fuentesCargadas = fntRes.data.length>0;
     S.online = true;
+    refreshStreaks();
     localStorage.setItem('sgc_cache', JSON.stringify({comps:S.comps,nps:S.nps,cfg:S.cfg,fuentes:FUENTES,fuentesCargadas,ts:Date.now()}));
   }catch(err){
     console.error('Error leyendo Supabase', err);
@@ -1042,7 +1046,8 @@ async function closeStalePending(){
   const stale=S.comps.filter(c=>c.st==='pending'&&c.wo<0);
   if(!stale.length) return;
   if(!confirm(`¿Cerrar ${stale.length} compromiso(s) vencido(s) como "No concretado · Cerrado por inactualización"? Verificá antes que ninguno esté realmente en curso.`)) return;
-  for(const c of stale){ c.st='no'; c.cau='Cerrado por inactualización'; c.streak=(c.streak||0)+1; }
+  for(const c of stale){ c.st='no'; c.cau='Cerrado por inactualización'; }
+  refreshStreaks();
   render();
   toast(`✓ ${stale.length} pendiente(s) cerrados`,'t-da');
   for(const c of stale){
@@ -1051,16 +1056,16 @@ async function closeStalePending(){
     }catch(err){console.error('Error cerrando pendiente vencido',c.id,err);}
   }
 }
-function mkOk(id){const c=S.comps.find(x=>x.id===id);if(!c)return;c.st='ok';c.streak=0;toast('✓ Marcado como cumplido','t-ok');render();
+function mkOk(id){const c=S.comps.find(x=>x.id===id);if(!c)return;c.st='ok';refreshStreaks();toast('✓ Marcado como cumplido','t-ok');render();
   sb.from('compromisos').update({estado:'ok',semanas_arrastre:0,fecha_actualizacion:new Date().toISOString()}).eq('id',id)
     .then(({error})=>{ if(error){console.error(error);toast('⚠ No se pudo sincronizar con Supabase','t-wa');} });
 }
 function openCau(id){S.pendCauId=id;document.getElementById('fCau').value='';document.getElementById('ovCau').classList.add('op');}
-function confNC(){const cau=document.getElementById('fCau').value.trim();if(!cau){toast('La causa es obligatoria','t-wa');return;}const c=S.comps.find(x=>x.id===S.pendCauId);if(c){c.st='no';c.cau=cau;c.streak=(c.streak||0)+1;}closeOv('ovCau');toast('Registrado como no concretado','t-da');render();
+function confNC(){const cau=document.getElementById('fCau').value.trim();if(!cau){toast('La causa es obligatoria','t-wa');return;}const c=S.comps.find(x=>x.id===S.pendCauId);if(c){c.st='no';c.cau=cau;}refreshStreaks();closeOv('ovCau');toast('Registrado como no concretado','t-da');render();
   if(c) sb.from('compromisos').update({estado:'no',causa_noconcretado:cau,semanas_arrastre:c.streak,fecha_actualizacion:new Date().toISOString()}).eq('id',c.id)
     .then(({error})=>{ if(error){console.error(error);toast('⚠ No se pudo sincronizar con Supabase','t-wa');} });
 }
-function delC(id){if(!confirm('¿Eliminar este compromiso?'))return;const c=S.comps.find(x=>x.id===id);S.comps=S.comps.filter(x=>x.id!==id);toast('Compromiso eliminado');render();
+function delC(id){if(!confirm('¿Eliminar este compromiso?'))return;const c=S.comps.find(x=>x.id===id);S.comps=S.comps.filter(x=>x.id!==id);refreshStreaks();toast('Compromiso eliminado');render();
   sb.from('compromisos').delete().eq('id',id).then(({error})=>{ if(error){console.error(error);toast('⚠ No se pudo eliminar en Supabase','t-wa');} });
 }
 function openSpR(id){S.pendSpId=id;const c=S.comps.find(x=>x.id===id);document.getElementById('spRqBox').textContent=c?c.spD:'';document.getElementById('fSpR').value='';document.getElementById('ovSp').classList.add('op');}
@@ -1111,7 +1116,11 @@ function selR(c,n,el){
   const sug={doc:'Documento publicado en sistema',nc:'NC/OM cerrada · tratamiento documentado y comunicado',poa:'Entregable completado y enviado'};
   if(!document.getElementById('fEn').value) document.getElementById('fEn').value=sug[S.selTipo]||'';
 }
-// ── ARRASTRE POR CÓDIGO (solo NC/OM y Documentos — ver nota en Guía de uso) ──
+// ── ARRASTRE (cálculo en vivo, no depende de la semana anterior) ──
+// Usa el código cuando existe (NC/OM, Documentos con número real); si no hay código
+// reconocible (ej. "PR-XXX" sin número), cae al texto completo del compromiso como respaldo.
+// Cuenta semanas consecutivas "no concretado" del mismo tema/persona, sin importar huecos
+// de semanas sin registrar nada (ej. vacaciones) — no exige que sea la semana inmediata anterior.
 function extractCode(tipo,nm){
   if(tipo==='nc'){
     const m=(nm||'').match(/^([^—]+)—/); return m?m[1].trim().toUpperCase():null;
@@ -1120,14 +1129,21 @@ function extractCode(tipo,nm){
     const m=(nm||'').match(/—\s*([A-ZÀ-Ú]{1,4}\s?-?\s?\d+[A-Za-zÀ-ú]*)/);
     return m?m[1].replace(/\s+/g,'').toUpperCase():null;
   }
-  return null; // poa / otro: el tema es genérico, no se enlaza automáticamente
+  return null; // sin código reconocible: matchKey cae al texto completo
 }
-function inheritedStreak(user,tipo,nm){
-  const code=extractCode(tipo,nm);
-  if(!code) return 0;
-  const prev=S.comps.find(c=>c.user===user && c.tipo===tipo && c.wo===S.wo-1 && c.st==='no' && extractCode(c.tipo,c.nm)===code);
-  return prev ? (prev.streak||0)+1 : 0;
+function matchKey(tipo,nm){ return extractCode(tipo,nm) || (nm||'').trim().toLowerCase(); }
+function liveStreak(c){
+  const key=matchKey(c.tipo,c.nm);
+  const chain=S.comps.filter(x=>x.user===c.user && matchKey(x.tipo,x.nm)===key && x.wo<=c.wo).sort((a,b)=>b.wo-a.wo);
+  let count=0;
+  for(const item of chain){
+    if(item.st==='no'){ count++; }
+    else if(item.id===c.id && item.st==='pending'){ continue; }
+    else break;
+  }
+  return count;
 }
+function refreshStreaks(){ S.comps.forEach(c=>{ c.streak=liveStreak(c); }); }
 async function saveC(){
   const nm=document.getElementById('fNm').value.trim();
   const en=document.getElementById('fEn').value.trim();
@@ -1140,19 +1156,20 @@ async function saveC(){
   if(!pr){toast('Seleccioná la prioridad','t-wa');return;}
   if(sp&&!spD){toast('Describí qué apoyo necesitás','t-wa');return;}
   const u=S.user==='admin'?ADMIN_EMAIL:S.user;
-  const streak0=inheritedStreak(u,S.selTipo,nm);
   closeMC();
   try{
     const {data,error}=await sb.from('compromisos').insert({
       email:u, semana_offset:curAbsWeek()+S.wo, semana_label:wkLbl(S.wo), mes:wkMes(S.wo),
       tipo:S.selTipo, tipo_label:TIPOS[S.selTipo].l, nombre_compromiso:nm, entregable:en,
       prioridad:pr, estado:'pending', soporte_solicitado:sp, soporte_descripcion:spD||null,
-      semanas_arrastre:streak0,
+      semanas_arrastre:0,
     }).select().single();
     if(error) throw error;
-    const c={id:data.id,user:u,wo:S.wo,tipo:S.selTipo,nm,en,pr,st:'pending',sp,spD,spR:'',cau:'',streak:streak0};
+    const c={id:data.id,user:u,wo:S.wo,tipo:S.selTipo,nm,en,pr,st:'pending',sp,spD,spR:'',cau:'',streak:0};
     S.comps.push(c);
-    toast(streak0?`✓ Compromiso agregado — arrastra ${streak0} sem. sin concretar`:'✓ Compromiso agregado','t-ok');render();
+    refreshStreaks();
+    toast(c.streak?`✓ Compromiso agregado — arrastra ${c.streak} sem. sin concretar`:'✓ Compromiso agregado','t-ok');render();
+    if(c.streak) sb.from('compromisos').update({semanas_arrastre:c.streak}).eq('id',c.id).then(({error})=>{ if(error) console.error(error); });
   }catch(err){
     console.error('Error guardando compromiso en Supabase', err);
     toast('⚠ No se pudo guardar el compromiso en Supabase','t-da');
@@ -1196,6 +1213,18 @@ function expCSV(){
   a.href='data:text/csv;charset=utf-8,\uFEFF'+encodeURIComponent(csv);
   a.download=`compromisos_sgc_${new Date().toISOString().slice(0,10)}.csv`;
   a.click();toast('✓ CSV exportado','t-ok');
+}
+function expCSVNP(){
+  const u=isLeader()?null:S.user;
+  const rows=[['Semana','Mes','Responsable','Email','Gestión','Entregable','Contexto']];
+  S.nps.filter(n=>u===null||n.user===u).forEach(n=>{
+    rows.push([wkLbl(n.wo),wkMes(n.wo),uName(n.user),n.user,n.nm,n.en,n.cx||'']);
+  });
+  const csv=rows.map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
+  const a=document.createElement('a');
+  a.href='data:text/csv;charset=utf-8,\uFEFF'+encodeURIComponent(csv);
+  a.download=`no_previstas_sgc_${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();toast('✓ CSV de no previstas exportado','t-ok');
 }
 
 // ── TOAST ─────────────────────────────────────────────────────
