@@ -205,6 +205,13 @@ input:checked+.tgl-s:before{transform:translateX(20px)}
     </div>
   </div>
 
+  <div id="adminOwnToggle" style="display:none;margin-bottom:.75rem">
+    <button class="btn b-pr b-sm" id="btnTeamView" onclick="setAdminOwn(false)">Todo el equipo</button>
+    <button class="btn b-sc b-sm" id="btnOwnView" onclick="setAdminOwn(true)">Solo mis compromisos</button>
+  </div>
+
+  <div id="closeStaleBox" style="display:none;margin-bottom:1rem"></div>
+
   <div class="sl">Pendientes de gestión — referencia para planificar
     <div style="display:flex;gap:8px;align-items:center">
       <button class="b-up btn b-sm" id="btnUp" onclick="document.getElementById('fUpload').click()">⬆ Actualizar fuentes</button>
@@ -287,6 +294,10 @@ input:checked+.tgl-s:before{transform:translateX(20px)}
     <div class="gst"><div class="gn">2</div><div class="gt"><strong>Durante la semana — actualizás el estado.</strong> Cuando cerrás un compromiso, lo marcás como <em>Cumplido</em>. Si surgió algo no planificado que completaste, lo registrás como gestión no prevista con su entregable concreto.</div></div>
     <div class="gst"><div class="gn">3</div><div class="gt"><strong>Viernes — cerrás lo pendiente.</strong> Si algo no pudiste completar, lo marcás como <em>No concretado</em> e indicás la causa. Este campo es obligatorio.</div></div>
     <div class="gst"><div class="gn">4</div><div class="gt"><strong>La semana siguiente — arrancás de nuevo.</strong> Lo no concretado queda en el historial. Si el tema sigue vigente, lo comprometés nuevamente. El historial acumula todo.</div></div>
+  </div>
+  <div class="gs">
+    <h3>Arrastre automático (⚠ X sem. sin concretar)</h3>
+    <p style="font-size:12.5px;line-height:1.6">Al registrar un compromiso de tipo <strong>NC/OM</strong> o <strong>Documento</strong>, la app busca si ese mismo código (ej. "NC - 23", "PR-632") quedó como no concretado la semana anterior — si lo encuentra, hereda el contador de arrastre automáticamente, sin que tengas que hacer nada. Para <strong>POA</strong> y <strong>Otra gestión</strong> el arrastre sigue siendo manual, porque el tema no tiene un código único y enlazar por texto generaría falsos positivos entre personas distintas.</p>
   </div>
   <div class="gs">
     <h3>Entregables válidos por tipo</h3>
@@ -488,7 +499,7 @@ let S = {
   selTipo:null, pendCauId:null, pendSpId:null,
   comps:[], nps:[], nid:1,
   cfg:{maxComp:5, diaPlan:'Lunes', adminOverride:false, metaSem:80, metaMes:75},
-  online:true, authMode:null,
+  online:true, authMode:null, adminOwn:false,
 };
 
 // ── WEEK / DATE ───────────────────────────────────────────────
@@ -769,8 +780,13 @@ function renderFuentes(){
 
 function togF(){const w=document.getElementById('fWrap');w.style.display=w.style.display==='none'?'':'none';}
 
+function setAdminOwn(v){S.adminOwn=v; document.getElementById('btnTeamView').className='btn '+(v?'b-sc':'b-pr')+' b-sm'; document.getElementById('btnOwnView').className='btn '+(v?'b-pr':'b-sc')+' b-sm'; render();}
+
 function renderComps(){
-  const u=isLeader()?null:S.user;
+  document.getElementById('adminOwnToggle').style.display=S.user==='admin'?'':'none';
+  const forcedOwn = S.user==='admin' && S.adminOwn;
+  const u = forcedOwn ? ADMIN_EMAIL : (isLeader()?null:S.user);
+  renderCloseStale();
   const items=S.comps.filter(c=>c.wo===S.wo&&(u===null||c.user===u));
   const el=document.getElementById('cList');
   if(!items.length){el.innerHTML=`<div class="empty"><div style="font-size:32px;margin-bottom:.5rem">📭</div><p>Sin compromisos para esta semana.</p></div>`;return;}
@@ -971,6 +987,30 @@ function sTab(id,btn){document.querySelectorAll('.tp').forEach(p=>p.classList.re
 function togCC(id){document.getElementById('cb'+id).classList.toggle('op');}
 function togAP(u){const key='ap-'+u.replace(/@/g,'_').replace(/\./g,'_');document.getElementById(key).classList.toggle('op');}
 function closeOv(id){document.getElementById(id).classList.remove('op');}
+function renderCloseStale(){
+  const box=document.getElementById('closeStaleBox');
+  if(S.user!=='admin'){box.style.display='none';return;}
+  const stale=S.comps.filter(c=>c.st==='pending'&&c.wo<0);
+  if(!stale.length){box.style.display='none';return;}
+  box.style.display='';
+  box.innerHTML=`<div class="ban ban-wa" style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">
+    <span>⚠ Hay <strong>${stale.length}</strong> compromiso(s) de semanas anteriores que quedaron sin actualizar.</span>
+    <button class="btn b-no b-sm" onclick="closeStalePending()">Cerrar pendientes vencidos (${stale.length})</button>
+  </div>`;
+}
+async function closeStalePending(){
+  const stale=S.comps.filter(c=>c.st==='pending'&&c.wo<0);
+  if(!stale.length) return;
+  if(!confirm(`¿Cerrar ${stale.length} compromiso(s) vencido(s) como "No concretado · Cerrado por inactualización"? Verificá antes que ninguno esté realmente en curso.`)) return;
+  for(const c of stale){ c.st='no'; c.cau='Cerrado por inactualización'; c.streak=(c.streak||0)+1; }
+  render();
+  toast(`✓ ${stale.length} pendiente(s) cerrados`,'t-da');
+  for(const c of stale){
+    try{
+      await sb.from('compromisos').update({estado:'no',causa_noconcretado:'Cerrado por inactualización',semanas_arrastre:c.streak,fecha_actualizacion:new Date().toISOString()}).eq('id',c.id);
+    }catch(err){console.error('Error cerrando pendiente vencido',c.id,err);}
+  }
+}
 function mkOk(id){const c=S.comps.find(x=>x.id===id);if(!c)return;c.st='ok';c.streak=0;toast('✓ Marcado como cumplido','t-ok');render();
   sb.from('compromisos').update({estado:'ok',semanas_arrastre:0,fecha_actualizacion:new Date().toISOString()}).eq('id',id)
     .then(({error})=>{ if(error){console.error(error);toast('⚠ No se pudo sincronizar con Supabase','t-wa');} });
@@ -1031,6 +1071,23 @@ function selR(c,n,el){
   const sug={doc:'Documento publicado en sistema',nc:'NC/OM cerrada · tratamiento documentado y comunicado',poa:'Entregable completado y enviado'};
   if(!document.getElementById('fEn').value) document.getElementById('fEn').value=sug[S.selTipo]||'';
 }
+// ── ARRASTRE POR CÓDIGO (solo NC/OM y Documentos — ver nota en Guía de uso) ──
+function extractCode(tipo,nm){
+  if(tipo==='nc'){
+    const m=(nm||'').match(/^([^—]+)—/); return m?m[1].trim().toUpperCase():null;
+  }
+  if(tipo==='doc'){
+    const m=(nm||'').match(/—\s*([A-ZÀ-Ú]{1,4}\s?-?\s?\d+[A-Za-zÀ-ú]*)/);
+    return m?m[1].replace(/\s+/g,'').toUpperCase():null;
+  }
+  return null; // poa / otro: el tema es genérico, no se enlaza automáticamente
+}
+function inheritedStreak(user,tipo,nm){
+  const code=extractCode(tipo,nm);
+  if(!code) return 0;
+  const prev=S.comps.find(c=>c.user===user && c.tipo===tipo && c.wo===S.wo-1 && c.st==='no' && extractCode(c.tipo,c.nm)===code);
+  return prev ? (prev.streak||0)+1 : 0;
+}
 async function saveC(){
   const nm=document.getElementById('fNm').value.trim();
   const en=document.getElementById('fEn').value.trim();
@@ -1043,17 +1100,19 @@ async function saveC(){
   if(!pr){toast('Seleccioná la prioridad','t-wa');return;}
   if(sp&&!spD){toast('Describí qué apoyo necesitás','t-wa');return;}
   const u=S.user==='admin'?ADMIN_EMAIL:S.user;
+  const streak0=inheritedStreak(u,S.selTipo,nm);
   closeMC();
   try{
     const {data,error}=await sb.from('compromisos').insert({
       email:u, semana_offset:curAbsWeek()+S.wo, semana_label:wkLbl(S.wo), mes:wkMes(S.wo),
       tipo:S.selTipo, tipo_label:TIPOS[S.selTipo].l, nombre_compromiso:nm, entregable:en,
       prioridad:pr, estado:'pending', soporte_solicitado:sp, soporte_descripcion:spD||null,
+      semanas_arrastre:streak0,
     }).select().single();
     if(error) throw error;
-    const c={id:data.id,user:u,wo:S.wo,tipo:S.selTipo,nm,en,pr,st:'pending',sp,spD,spR:'',cau:'',streak:0};
+    const c={id:data.id,user:u,wo:S.wo,tipo:S.selTipo,nm,en,pr,st:'pending',sp,spD,spR:'',cau:'',streak:streak0};
     S.comps.push(c);
-    toast('✓ Compromiso agregado','t-ok');render();
+    toast(streak0?`✓ Compromiso agregado — arrastra ${streak0} sem. sin concretar`:'✓ Compromiso agregado','t-ok');render();
   }catch(err){
     console.error('Error guardando compromiso en Supabase', err);
     toast('⚠ No se pudo guardar el compromiso en Supabase','t-da');
