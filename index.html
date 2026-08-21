@@ -313,11 +313,15 @@ input:checked+.tgl-s:before{transform:translateX(20px)}
   <div class="gs">
     <h3>Entregables válidos por tipo</h3>
     <ul>
-      <li><strong>Documentos:</strong> Documento publicado en sistema · Documento enviado a aprobación del área</li>
+      <li><strong>Documentos:</strong> Documento <strong>publicado en sistema</strong> — vigente. "Enviado a aprobación", "en revisión" o "pendiente de firma" <strong>no cuenta como concretado</strong>, aunque esté avanzado</li>
       <li><strong>NC/OM:</strong> NC/OM cerrada · Tratamiento documentado y comunicado al área · Revisión de evidencias registrada</li>
       <li><strong>POA:</strong> Informe emitido · Flujo definido y documentado · Capacitación realizada con lista de asistencia · Piloto documentado</li>
       <li><strong>No cuenta:</strong> "Avanzar en", "revisar", "coordinar", correos de seguimiento sin resultado concreto</li>
     </ul>
+  </div>
+  <div class="gs">
+    <h3>Gestiones no previstas — qué sí cuenta</h3>
+    <p style="font-size:12.5px;line-height:1.6">Una <strong>reunión no es, por sí sola, una gestión no prevista</strong> — es el medio, no el resultado. Contá lo que la reunión produjo: un acta, una decisión tomada, un ajuste concreto a un plan, un problema resuelto. "Tuve una reunión con X" no se registra; "Acta firmada con acuerdo de..." sí.</p>
   </div>
   <div class="gs">
     <h3>Soporte al líder</h3>
@@ -362,7 +366,7 @@ input:checked+.tgl-s:before{transform:translateX(20px)}
       </div>
       <div class="field"><span class="f-l">Entregable esperado <span style="color:var(--da)">*</span></span>
         <input type="text" id="fEn" placeholder="Ej: NC cerrada con evidencia de acción correctiva">
-        <div class="f-n">Debe ser concreto y verificable. No aceptar: "avanzar en", "revisar", "coordinar".</div>
+        <div class="f-n" id="fEnNote">Debe ser concreto y verificable. No aceptar: "avanzar en", "revisar", "coordinar".</div>
       </div>
       <div class="field"><span class="f-l">Prioridad <span style="color:var(--da)">*</span></span>
         <select class="f-s" id="fPr"><option value="">— Seleccionar —</option><option value="Alta">Alta</option><option value="Media">Media</option><option value="Baja">Baja</option></select>
@@ -403,7 +407,7 @@ input:checked+.tgl-s:before{transform:translateX(20px)}
   <div class="modal">
     <div class="mh"><span class="mt">Gestión no prevista</span><button class="mc2" onclick="closeOv('ovNP')">✕</button></div>
     <div class="mb">
-      <div class="ban ban-ok" style="margin-bottom:.75rem">✓ Solo registrá gestiones que completaste — con entregable concreto.</div>
+      <div class="ban ban-ok" style="margin-bottom:.75rem">✓ Solo registrá gestiones que completaste — con entregable concreto. Una reunión sola no cuenta: registrá su resultado (acta, decisión, ajuste concreto), no la reunión en sí.</div>
       <div class="field"><span class="f-l">Descripción <span style="color:var(--da)">*</span></span>
         <input type="text" id="npNm" placeholder="Ej: Apoyo urgente en auditoría área Siniestros">
       </div>
@@ -1056,7 +1060,11 @@ async function closeStalePending(){
     }catch(err){console.error('Error cerrando pendiente vencido',c.id,err);}
   }
 }
-function mkOk(id){const c=S.comps.find(x=>x.id===id);if(!c)return;c.st='ok';refreshStreaks();toast('✓ Marcado como cumplido','t-ok');render();
+function mkOk(id){const c=S.comps.find(x=>x.id===id);if(!c)return;
+  if(c.tipo==='doc' && /aprobaci|revisi[oó]n|pendiente/i.test(c.en||'')){
+    if(!confirm('El entregable dice "'+c.en+'" — ¿el documento ya está PUBLICADO en el sistema, no solo en aprobación/revisión? Confirmá solo si ya está vigente.')) return;
+  }
+  c.st='ok';refreshStreaks();toast('✓ Marcado como cumplido','t-ok');render();
   sb.from('compromisos').update({estado:'ok',semanas_arrastre:0,fecha_actualizacion:new Date().toISOString()}).eq('id',id)
     .then(({error})=>{ if(error){console.error(error);toast('⚠ No se pudo sincronizar con Supabase','t-wa');} });
 }
@@ -1109,6 +1117,13 @@ function selT(tipo,btn){
     </div>`).join(''):'<div style="padding:8px 10px;font-size:12px;color:var(--mu);font-style:italic">Sin pendientes asignados — escribí el compromiso manualmente</div>';
     rfS.style.display='';
   } else { rfS.style.display='none'; }
+  const notes={
+    doc:'Debe ser el documento <strong>publicado</strong> en el sistema. "En aprobación", "enviado para revisión" o similar NO cuenta como concretado — solo el documento ya vigente.',
+    nc:'Debe ser concreto y verificable. No aceptar: "avanzar en", "revisar", "coordinar".',
+    poa:'Debe ser concreto y verificable. No aceptar: "avanzar en", "revisar", "coordinar".',
+    otro:'Debe ser concreto y verificable. No aceptar: "avanzar en", "revisar", "coordinar".',
+  };
+  document.getElementById('fEnNote').innerHTML=notes[tipo]||notes.otro;
 }
 function selR(c,n,el){
   document.querySelectorAll('.ri').forEach(i=>i.classList.remove('sel'));el.classList.add('sel');
