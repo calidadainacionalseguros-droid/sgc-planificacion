@@ -502,7 +502,9 @@ const ADMIN_EMAIL = 'ygarcia@nacionalseguros.com.bo';
 // como riesgo temporal de la fase de validación (ver Guía de uso > Seguridad).
 const SUPABASE_URL = 'https://khaalvprukdruqrhfqmr.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_50SMmPSi3lf3-4P4f8_68A__bQu-ae9';
-const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
+  global: { fetch: (url, options) => fetch(url, { ...options, cache: 'no-store' }) },
+});
 
 // ── FUENTES (se cargan desde Excel) ──────────────────────────
 let FUENTES = {doc:[], nc:[], poa:[]};
